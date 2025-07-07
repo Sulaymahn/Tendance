@@ -1,0 +1,86 @@
+@use '../../styles.scss' as *;
+
+.main-actions {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: end;
+
+    button {
+        width: auto;
+    }
+}
+
+td:has(button) {
+    height: 54px;
+    width: 54px;
+    padding: 0;
+    position: relative;
+
+    button {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+td:not(:has(button)) {
+    &:hover {
+        background-color: $color-neutral-2;
+    }
+
+    cursor: pointer;
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 2;
+    border: 1px solid $color-neutral-3;
+
+    button {
+        height: 54px;
+        width: 160px;
+        text-align: end;
+    }
+}
+
+.dialog {
+    width: auto;
+    height: auto;
+    background-color: $color-white;
+    min-width: 480px;
+
+    .text-field {
+        margin-bottom: 16px;
+    }
+
+    .dialog-actions {
+        padding: 32px;
+        padding-top: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 32px;
+    }
+
+    button.close:hover {
+        background-color: $color-neutral-2;
+    }
+}
+
+.dialog-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding: 32px;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    height: 54px;
+}
+
+form {
+    padding: 0 32px;
+    padding-bottom: 16px;
+}

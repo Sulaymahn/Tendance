@@ -1,0 +1,142 @@
+<div>
+  <div class="main-actions">
+    <button class="primary" (click)="modalState = modalStates.CreateStudent">
+      New Student
+    </button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Created</th>
+        <th class="text-end">Rate</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (student of students; track $index) {
+      <tr>
+        <td (click)="selectStudent(student)">{{ student.id }}</td>
+        <td (click)="selectStudent(student)">
+          {{ student.firstName }} {{ student.middleName }}
+          {{ student.lastName }}
+        </td>
+        <td (click)="selectStudent(student)">{{ student.email }}</td>
+        <td (click)="selectStudent(student)">
+          {{ student.created | date : "medium" }}
+        </td>
+        <td class="text-end" (click)="selectStudent(student)">
+          {{ student.attendanceRate }}%
+        </td>
+        <td>
+          <button class="icon" title="options" (click)="optionClick(student)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+              <rect width="4.11" height="4.11" />
+              <rect x="6.17" width="4.11" height="4.11" />
+              <rect x="12.33" width="4.11" height="4.11" />
+            </svg>
+          </button>
+
+          @if(modalContext.studentOption?.id == student.id){
+          <div class="dropdown" appClickOutside (clickOutside)="closeOption()">
+            <button>Edit</button>
+            <button class="danger" (click)="deleteStudent(student)">
+              Delete
+            </button>
+          </div>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if(modalState == modalStates.CreateStudent) {
+<app-dialog (dismissed)="closeModal()">
+  <div class="dialog">
+    <div class="dialog-header">
+      <button (click)="closeModal()" class="icon close" title="close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.17 10.17">
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(-2.11 5.09) rotate(-45)"
+          />
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(5.09 -2.11) rotate(45)"
+          />
+        </svg>
+      </button>
+    </div>
+    <p class="dialog-title">Add new student</p>
+    <form>
+      <div class="text-field">
+        <label>Student ID*</label>
+        <input
+          title="student id"
+          type="text"
+          placeholder="student ID"
+          [formControl]="createStudentForm.controls.id"
+        />
+      </div>
+      <div class="text-field">
+        <label>First name*</label>
+        <input
+          title="firstname"
+          type="text"
+          placeholder="firstname"
+          [formControl]="createStudentForm.controls.firstName"
+        />
+      </div>
+      <div class="text-field">
+        <label>Middle name</label>
+        <input
+          title="lastname"
+          type="text"
+          placeholder="lastname"
+          [formControl]="createStudentForm.controls.middleName"
+        />
+      </div>
+      <div class="text-field">
+        <label>Last name*</label>
+        <input
+          title="lastname"
+          type="text"
+          placeholder="lastname"
+          [formControl]="createStudentForm.controls.lastName"
+        />
+      </div>
+      <div class="text-field">
+        <label>Email*</label>
+        <input
+          title="email"
+          type="email"
+          placeholder="email"
+          [formControl]="createStudentForm.controls.email"
+        />
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button
+        class="primary"
+        (click)="createStudent()"
+        [disabled]="createStudentForm.invalid"
+      >
+        Create Student
+      </button>
+    </div>
+  </div>
+</app-dialog>
+}

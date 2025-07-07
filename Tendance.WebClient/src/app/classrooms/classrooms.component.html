@@ -1,0 +1,187 @@
+<div>
+  <div class="main-actions">
+    <button class="primary" (click)="modalState = modalStates.CreateClassroom">
+      New Classroom
+    </button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Course</th>
+        <th>Teacher</th>
+        <th>Room</th>
+        <th>Created</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (classroom of classrooms; track $index) {
+      <tr>
+        <td (click)="selectClassroom(classroom)">
+          {{ classroom.course.name }}
+        </td>
+        <td (click)="selectClassroom(classroom)">
+          {{ classroom.teacher.firstName }} {{ classroom.teacher.middleName }}
+          {{ classroom.teacher.lastName }}
+        </td>
+        <td (click)="selectClassroom(classroom)">
+          {{ classroom.room.name }} - {{ classroom.room.building }}
+        </td>
+        <td (click)="selectClassroom(classroom)">
+          {{ classroom.created | date : "medium" }}
+        </td>
+        <td>
+          <button class="icon" title="options" (click)="optionClick(classroom)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+              <rect width="4.11" height="4.11" />
+              <rect x="6.17" width="4.11" height="4.11" />
+              <rect x="12.33" width="4.11" height="4.11" />
+            </svg>
+          </button>
+
+          @if(modalContext.classroomOption?.id == classroom.id){
+          <div
+            class="option-dropdown"
+            appClickOutside
+            (clickOutside)="closeOption()"
+          >
+            <button>Edit</button>
+            <button class="danger" (click)="deleteClassroom(classroom)">
+              Delete
+            </button>
+          </div>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if(modalState == modalStates.CreateClassroom) {
+<app-dialog (dismissed)="closeModal()">
+  <div class="dialog">
+    <div class="dialog-header">
+      <button (click)="closeModal()" class="icon close" title="close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.17 10.17">
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(-2.11 5.09) rotate(-45)"
+          />
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(5.09 -2.11) rotate(45)"
+          />
+        </svg>
+      </button>
+    </div>
+    <p class="dialog-title">Add new classroom</p>
+    <form>
+      <div class="text-field">
+        <label>Room</label>
+        <button
+          class="dropdown"
+          title="room"
+          type="button"
+          (click)="showRooms()"
+        >
+          @if(createClassroomForm.room){
+          <span>{{ createClassroomForm.room.name }}</span>
+          }@else {
+          <span class="placeholder">- Select a room -</span>
+          }
+        </button>
+
+        @if (createClassroomForm.choice == 'room') {
+        <div
+          class="option-dropdown"
+          appClickOutside
+          (clickOutside)="createClassroomForm.choice = null"
+        >
+          @for (room of rooms; track $index) {
+          <button (click)="selectRoom(room)" type="button">
+            {{ room.name }}
+          </button>
+          }
+        </div>
+        }
+      </div>
+      <div class="text-field">
+        <label>Course</label>
+        <button
+          class="dropdown"
+          title="course"
+          type="button"
+          (click)="showCourses()"
+        >
+          @if(createClassroomForm.course){
+          <span>{{ createClassroomForm.course.name }}</span>
+          }@else {
+          <span class="placeholder">- Select a course -</span>
+          }
+        </button>
+        @if (createClassroomForm.choice == 'course') {
+        <div
+          class="option-dropdown"
+          appClickOutside
+          (clickOutside)="createClassroomForm.choice = null"
+        >
+          @for (course of courses; track $index) {
+          <button (click)="selectCourse(course)" type="button">
+            {{ course.name }}
+          </button>
+          }
+        </div>
+        }
+      </div>
+      <div class="text-field">
+        <label>Teacher</label>
+        <button
+          class="dropdown"
+          title="teacher"
+          type="button"
+          (click)="showTeachers()"
+        >
+          @if(createClassroomForm.teacher){
+          <span>{{ createClassroomForm.teacher.firstName }}</span>
+          }@else {
+          <span class="placeholder">- Select a teacher -</span>
+          }
+        </button>
+        @if (createClassroomForm.choice == 'teacher') {
+        <div
+          class="option-dropdown"
+          appClickOutside
+          (clickOutside)="createClassroomForm.choice = null"
+        >
+          @for (teacher of teachers; track $index) {
+          <button (click)="selectTeacher(teacher)" type="button">
+            {{ teacher.firstName }} {{ teacher.middleName }}
+            {{ teacher.lastName }}
+          </button>
+          }
+        </div>
+        }
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button
+        class="primary"
+        (click)="createClassroom()"
+        [disabled]="createClassroomForm.invalid()"
+      >
+        Create Classroom
+      </button>
+    </div>
+  </div>
+</app-dialog>
+}

@@ -1,0 +1,105 @@
+<div>
+  <div class="main-actions">
+    <button class="primary" (click)="modalState = modalStates.CreateRoom">
+      New Room
+    </button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Building</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (room of rooms; track $index) {
+      <tr>
+        <td (click)="selectTeacher(room)">{{ room.name }}</td>
+        <td (click)="selectTeacher(room)">{{ room.building }}</td>
+        <td>
+          <button
+            class="icon"
+            title="options"
+            type="button"
+            (click)="optionDropdownClick(room)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+              <rect width="4.11" height="4.11" />
+              <rect x="6.17" width="4.11" height="4.11" />
+              <rect x="12.33" width="4.11" height="4.11" />
+            </svg>
+          </button>
+
+          @if(modalContext.roomOption?.id == room.id){
+          <div class="dropdown" appClickOutside (clickOutside)="closeOption()">
+            <button>Edit</button>
+            <button class="danger" (click)="deleteRoom(room)">Delete</button>
+          </div>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if(modalState == modalStates.CreateRoom) {
+<app-dialog (dismissed)="closeModal()">
+  <div class="dialog">
+    <div class="dialog-header">
+      <button (click)="closeModal()" class="icon close" title="close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.17 10.17">
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(-2.11 5.09) rotate(-45)"
+          />
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(5.09 -2.11) rotate(45)"
+          />
+        </svg>
+      </button>
+    </div>
+    <p class="dialog-title">Add new room</p>
+    <form>
+      <div class="text-field">
+        <label>Name*</label>
+        <input
+          title="name"
+          type="text"
+          placeholder="name"
+          [formControl]="createRoomForm.controls.name"
+        />
+      </div>
+      <div class="text-field">
+        <label>Building</label>
+        <input
+          title="building"
+          type="text"
+          placeholder="building"
+          [formControl]="createRoomForm.controls.building"
+        />
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button
+        class="primary"
+        (click)="createRoom()"
+        [disabled]="createRoomForm.invalid"
+      >
+        Create room
+      </button>
+    </div>
+  </div>
+</app-dialog>
+}

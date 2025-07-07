@@ -1,0 +1,66 @@
+<div class="wrapper">
+  <div class="left-pane">
+    <h1>
+      The most Extensible Digital Student Attendance System for Tertiary
+      Institutions
+    </h1>
+  </div>
+  <div class="right-pane">
+    <main>
+      <img src="tendance_logo.png" title="tendance logo" />
+      <h3>Signup</h3>
+
+      <div class="text-field">
+        <label>School name</label>
+        <input
+          type="text"
+          placeholder="School name"
+          [formControl]="form.controls.schoolName"
+        />
+      </div>
+
+      <div class="text-field">
+        <label>School Email</label>
+        <input
+          type="text"
+          placeholder="School email"
+          [formControl]="form.controls.schoolEmail"
+        />
+      </div>
+
+      <div class="text-field">
+        <label>Username</label>
+        <input
+          type="text"
+          placeholder="Username"
+          [formControl]="form.controls.username"
+        />
+      </div>
+
+      <div class="text-field">
+        <label>Email</label>
+        <input
+          type="email"
+          placeholder="Email"
+          [formControl]="form.controls.email"
+        />
+      </div>
+
+      <div class="text-field">
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="Password"
+          [formControl]="form.controls.password"
+        />
+      </div>
+
+      <button class="primary" (click)="signup()" [disabled]="form.invalid">
+        Signup
+      </button>
+      <p class="forgot-password">
+        Already have an account? <a routerLink="/login">login here</a>
+      </p>
+    </main>
+  </div>
+</div>

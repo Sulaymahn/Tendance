@@ -1,0 +1,55 @@
+@use '../../styles.scss' as *;
+
+.wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+}
+
+.left-pane {
+    padding: 64px;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    background-color: $color-primary;
+
+    h1 {
+        grid-row: 2;
+        color: $color-white;
+        font-size: 3rem;
+    }
+}
+
+.right-pane {
+    padding: 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    main {
+        width: 400px;
+    }
+
+    img {
+        height: 64px;
+        margin-bottom: 32px;
+    }
+
+    h3 {
+        font-size: 2.25rem;
+        margin-bottom: 20px;
+    }
+}
+
+.text-field {
+    margin-bottom: 16px;
+}
+
+.forgot-password {
+    span {
+        color: $color-primary;
+    }
+}
+
+button {
+    margin-bottom: 32px;
+}

@@ -1,0 +1,14 @@
+@use '../../styles.scss' as *;
+
+.wrapper {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    padding: 16px;
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: $color-text;
+    font-weight: 500;
+}

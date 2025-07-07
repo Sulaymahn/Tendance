@@ -1,0 +1,52 @@
+<div class="wrapper">
+  <div class="brand-logo">
+    <img src="tendance_logo.png" title="tendance logo" />
+  </div>
+
+  <div>
+    <p class="header">General</p>
+    <ul>
+      <li>
+        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      </li>
+      <li>
+        <a routerLink="/students" routerLinkActive="active">Students</a>
+      </li>
+      <li>
+        <a routerLink="/teachers" routerLinkActive="active">Teachers</a>
+      </li>
+      <li>
+        <a routerLink="/courses" routerLinkActive="active">Courses</a>
+      </li>
+      <li>
+        <a routerLink="/rooms" routerLinkActive="active">Rooms</a>
+      </li>
+      <li>
+        <a routerLink="/classrooms" routerLinkActive="active">Classrooms</a>
+      </li>
+    </ul>
+
+    <p class="header">Configuration</p>
+    <ul>
+      <li>
+        <a routerLink="/devices" routerLinkActive="active">Devices</a>
+      </li>
+      <li>
+        <a routerLink="/webhooks" routerLinkActive="active">Webhooks</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="profile">
+    <div>
+      <p class="username">{{ user?.username }}</p>
+    </div>
+    <button class="icon" title="options">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+        <rect width="4.11" height="4.11" />
+        <rect x="6.17" width="4.11" height="4.11" />
+        <rect x="12.33" width="4.11" height="4.11" />
+      </svg>
+    </button>
+  </div>
+</div>

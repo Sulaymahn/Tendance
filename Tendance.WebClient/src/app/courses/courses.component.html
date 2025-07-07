@@ -1,0 +1,113 @@
+<div>
+  <div class="main-actions">
+    <button
+      class="primary"
+      routerLink="/teachers/add"
+      (click)="modalState = modalStates.CreateCourse"
+    >
+      New Course
+    </button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Created</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (course of courses; track $index) {
+      <tr>
+        <td (click)="selectTeacher(course)">{{ course.name }}</td>
+        <td (click)="selectTeacher(course)">
+          {{ course.created | date : "medium" }}
+        </td>
+        <td>
+          <button
+            class="icon"
+            title="options"
+            type="button"
+            (click)="optionDropdownClick(course)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+              <rect width="4.11" height="4.11" />
+              <rect x="6.17" width="4.11" height="4.11" />
+              <rect x="12.33" width="4.11" height="4.11" />
+            </svg>
+          </button>
+
+          @if(modalContext.courseOption?.id == course.id){
+          <div class="dropdown" appClickOutside (clickOutside)="closeOption()">
+            <button>Edit</button>
+            <button class="danger" (click)="deleteCourse(course)">
+              Delete
+            </button>
+          </div>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if(modalState == modalStates.CreateCourse) {
+<app-dialog (dismissed)="closeModal()">
+  <div class="dialog">
+    <div class="dialog-header">
+      <button (click)="closeModal()" class="icon close" title="close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.17 10.17">
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(-2.11 5.09) rotate(-45)"
+          />
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(5.09 -2.11) rotate(45)"
+          />
+        </svg>
+      </button>
+    </div>
+    <p class="dialog-title">Add new course</p>
+    <form>
+      <div class="text-field">
+        <label>Name*</label>
+        <input
+          title="name"
+          type="text"
+          placeholder="name"
+          [formControl]="createCourseForm.controls.name"
+        />
+      </div>
+      <div class="text-field">
+        <label>Description</label>
+        <input
+          title="lastname"
+          type="text"
+          placeholder="description"
+          [formControl]="createCourseForm.controls.description"
+        />
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button
+        class="primary"
+        (click)="createCourse()"
+        [disabled]="createCourseForm.invalid"
+      >
+        Create course
+      </button>
+    </div>
+  </div>
+</app-dialog>
+}

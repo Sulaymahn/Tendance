@@ -1,0 +1,131 @@
+<div>
+  <div class="main-actions">
+    <button class="primary" (click)="modalState = modalStates.CreateTeacher">
+      New Teacher
+    </button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Created</th>
+        <th class="text-end">Rate</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (teacher of teachers; track $index) {
+      <tr>
+        <td (click)="selectTeacher(teacher)">
+          {{ teacher.firstName }} {{ teacher.middleName }}
+          {{ teacher.lastName }}
+        </td>
+        <td (click)="selectTeacher(teacher)">{{ teacher.email }}</td>
+        <td (click)="selectTeacher(teacher)">
+          {{ teacher.created | date : "medium" }}
+        </td>
+        <td class="text-end" (click)="selectTeacher(teacher)">
+          {{ teacher.attendanceRate }}%
+        </td>
+        <td>
+          <button class="icon" title="options" (click)="optionClick(teacher)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+              <rect width="4.11" height="4.11" />
+              <rect x="6.17" width="4.11" height="4.11" />
+              <rect x="12.33" width="4.11" height="4.11" />
+            </svg>
+          </button>
+
+          @if(modalContext.teacherOption?.id == teacher.id){
+          <div class="dropdown" appClickOutside (clickOutside)="closeOption()">
+            <button>Edit</button>
+            <button class="danger" (click)="deleteTeacher(teacher)">
+              Delete
+            </button>
+          </div>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if(modalState == modalStates.CreateTeacher) {
+<app-dialog (dismissed)="closeModal()">
+  <div class="dialog">
+    <div class="dialog-header">
+      <button (click)="closeModal()" class="icon close" title="close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.17 10.17">
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(-2.11 5.09) rotate(-45)"
+          />
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(5.09 -2.11) rotate(45)"
+          />
+        </svg>
+      </button>
+    </div>
+    <p class="dialog-title">Add new teacher</p>
+    <form>
+      <div class="text-field">
+        <label>First name*</label>
+        <input
+          title="firstname"
+          type="text"
+          placeholder="firstname"
+          [formControl]="createTeacherForm.controls.firstName"
+        />
+      </div>
+      <div class="text-field">
+        <label>Middle name</label>
+        <input
+          title="lastname"
+          type="text"
+          placeholder="lastname"
+          [formControl]="createTeacherForm.controls.middleName"
+        />
+      </div>
+      <div class="text-field">
+        <label>Last name*</label>
+        <input
+          title="lastname"
+          type="text"
+          placeholder="lastname"
+          [formControl]="createTeacherForm.controls.lastName"
+        />
+      </div>
+      <div class="text-field">
+        <label>Email*</label>
+        <input
+          title="email"
+          type="email"
+          placeholder="email"
+          [formControl]="createTeacherForm.controls.email"
+        />
+      </div>
+    </form>
+    <div class="dialog-actions">
+      <button
+        class="primary"
+        (click)="createTeacher()"
+        [disabled]="createTeacherForm.invalid"
+      >
+        Create teacher
+      </button>
+    </div>
+  </div>
+</app-dialog>
+}

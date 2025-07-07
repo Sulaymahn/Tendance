@@ -1,0 +1,73 @@
+@use '../../styles.scss' as *;
+
+.wrapper {
+    min-width: 280px;
+    background-color: $color-white;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+.brand-logo {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    height: 100px;
+    padding: 0 16px;
+
+    img {
+        height: 48px;
+        width: auto;
+    }
+}
+
+li {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    border: none;
+    transition: border-left 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    a {
+        padding: 0 16px;
+        color: $color-text;
+        font-size: 1.125rem;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+    }
+
+    a.active {
+        color: $color-primary;
+    }
+}
+
+li:has(a.active) {
+    border-left: 16px solid $color-primary;
+}
+
+li:hover {
+    border-right: 4px solid $color-primary;
+}
+
+.header {
+    padding: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $color-text;
+}
+
+.profile {
+    height: 54px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 54px;
+
+    div:has(.username) {
+        padding: 0 16px;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+    }
+}
