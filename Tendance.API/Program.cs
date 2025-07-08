@@ -26,8 +26,10 @@ namespace Tendance.API
             builder.Services.AddHttpClient();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<UserContextAccessor>();
+            builder.Services.AddScoped<FacialRecognitionService>();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddDbContext<ApplicationDbContext>();
+
             JwtSettings jwtSetting = builder.Configuration.GetRequiredSection("JwtSettings").Get<JwtSettings>()!;
             builder.Services.AddSingleton(jwtSetting);
             builder.Services.AddAuthentication(opt =>

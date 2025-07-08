@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OpenCvSharp;
 using Tendance.API.Data;
 using Tendance.API.Entities;
 using Tendance.API.Models;
@@ -10,10 +9,13 @@ namespace Tendance.API.Controllers
 {
     [Route("api/capture")]
     [ApiController]
-    public class CaptureController(ApplicationDbContext dbContext) : ControllerBase
+    public class CaptureController(ApplicationDbContext dbContext, FacialRecognitionService facialRecognitionService) : ControllerBase
     {
         [HttpPost]
-        public async Task<IActionResult> CaptureAsync([FromHeader(Name = "X-Client-Key")] string clientKey, [FromForm] IFormFile formFile)
+        public async Task<IActionResult> CaptureAsync(
+            [FromHeader(Name = "X-Client-Key")] string clientKey,
+            [FromHeader(Name = "X-Attendance-Type")] AttendanceType attendanceType,
+            [FromForm(Name = "file")] IFormFile file)
         {
             CaptureDevice? device = await dbContext.Devices.FirstOrDefaultAsync(device => device.ClientKey == clientKey);
             if (device == null)
@@ -27,60 +29,24 @@ namespace Tendance.API.Controllers
             }
 
             using var ms = new MemoryStream();
-            await formFile.CopyToAsync(ms);
+            await file.CopyToAsync(ms);
             byte[] bytes = ms.ToArray();
 
-            Mat? face = FaceDetectionHelper.DetectAndCropFace(bytes);
-            if (face == null)
+            CaptureMatchResult result = device.Type switch
             {
-                return BadRequest("Face Unrecognized or multiple faces detected");
-            }
+                CaptureDeviceType.FacialRecognition => await facialRecognitionService.MatchAsync(bytes, device),
+                _ => throw new ArgumentException("Unrecognized capture device type")
+            };
 
-            var queryEmbedding = FaceEncoder.ExtractEmbedding(face);
-
-            var registeredFaces = await dbContext.StudentFaces
-                .Include(sf => sf.Student)
-                .Where(sf => sf.Student.SchoolId == device.SchoolId)
-                .ToListAsync();
-
-            if (registeredFaces.Count == 0)
-            {
-                return NotFound("No registered faces found");
-            }
-
-            float threshold = 0.1f;
-            StudentFace? bestMatch = null;
-            float bestScore = -1f;
-
-            foreach (var regFace in registeredFaces)
-            {
-                float score = CosineSimilarity(queryEmbedding, regFace.Embedding);
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestMatch = regFace;
-                }
-            }
-
-            if (bestMatch == null || bestScore < threshold)
-            {
-                return Ok(new { Matched = false, Message = "No matching face found" });
-            }
-
-            // Matched!
-            return Ok(new
-            {
-                Matched = true,
-                StudentId = bestMatch.StudentId,
-                Similarity = bestScore
-            });
+            return Ok(result);
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(
             [FromHeader(Name = "X-Client-Key")] string clientKey,
-            [FromHeader(Name = "X-Student-Id")] string studentSchoolId,
-            [FromForm] IFormFile formFile)
+            [FromHeader(Name = "X-Capture-Role")] AttendanceRole role,
+            [FromHeader(Name = "X-Capture-Owner-Id")] string ownerId,
+            [FromForm(Name = "file")] IFormFile file)
         {
             CaptureDevice? device = await dbContext.Devices.FirstOrDefaultAsync(device => device.ClientKey == clientKey);
             if (device == null)
@@ -88,47 +54,29 @@ namespace Tendance.API.Controllers
                 return BadRequest("Unknown Device");
             }
 
-            Student? student = await dbContext.Students.FirstOrDefaultAsync(student => student.SchoolAssignedId == studentSchoolId && student.SchoolId == device.SchoolId);
-            if (student == null)
+            object? person = role switch
             {
-                return BadRequest("Unknown Student");
+                AttendanceRole.Student => await dbContext.Students.FirstOrDefaultAsync(student => student.SchoolAssignedId == ownerId && student.SchoolId == device.SchoolId),
+                AttendanceRole.Teacher => await dbContext.Teachers.FirstOrDefaultAsync(teacher => teacher.Id == int.Parse(ownerId) && teacher.SchoolId == device.SchoolId),
+                _ => throw new ArgumentException("Unknown role")
+            };
+
+            if (person == null)
+            {
+                return BadRequest("Could not find owner");
             }
 
             using var ms = new MemoryStream();
-            await formFile.CopyToAsync(ms);
+            await file.CopyToAsync(ms);
             byte[] bytes = ms.ToArray();
 
-            Mat? face = FaceDetectionHelper.DetectAndCropFace(bytes);
-            if (face == null)
+            CaptureRegisterResult result = device.Type switch
             {
-                return BadRequest("Face Unrecognized");
-            }
-
-            var encoding = FaceEncoder.ExtractEmbedding(face);
-            var studentFace = new StudentFace
-            {
-                StudentId = student.Id,
-                CaptureDeviceId = device.Id,
-                Created = DateTime.UtcNow,
-                Embedding = encoding,
+                CaptureDeviceType.FacialRecognition => await facialRecognitionService.RegisterAsync(bytes, device, role, person),
+                _ => throw new ArgumentException("Unrecognized capture device type")
             };
 
-            await dbContext.StudentFaces.AddAsync(studentFace);
-            await dbContext.SaveChangesAsync();
-
             return Ok();
-        }
-
-        private static float CosineSimilarity(float[] a, float[] b)
-        {
-            float dot = 0f, normA = 0f, normB = 0f;
-            for (int i = 0; i < a.Length; i++)
-            {
-                dot += a[i] * b[i];
-                normA += a[i] * a[i];
-                normB += b[i] * b[i];
-            }
-            return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
         }
     }
 }

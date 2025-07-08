@@ -26,7 +26,7 @@
           {{ classroom.teacher.lastName }}
         </td>
         <td (click)="selectClassroom(classroom)">
-          {{ classroom.room.name }} - {{ classroom.room.building }}
+          {{ classroom.room.name }} {{ classroom.room.building }}
         </td>
         <td (click)="selectClassroom(classroom)">
           {{ classroom.created | date : "medium" }}
