@@ -1,10 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { BackendService } from '../../services/backend/backend.service';
-import { Classroom, ClassroomForCreation, Course, CourseMinimal, Room, RoomMinimal, Teacher, TeacherMinimal } from '../../services/backend/backend.service.model';
 import { DatePipe } from '@angular/common';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
 import { DialogComponent } from '../dialog/dialog.component';
+import { Classroom, ClassroomForCreation, ClassroomService } from '../../services/classroom/classroom.service';
+import { TeacherMinimal, TeacherService } from '../../services/teacher/teacher.service';
+import { StudentService } from '../../services/student/student.service';
+import { RoomMinimal, RoomService } from '../../services/room/room.service';
+import { CourseMinimal, CourseService } from '../../services/course/course.service';
 
 
 enum ClassroomModalState {
@@ -38,7 +41,11 @@ class CreateClassroomForm {
   styleUrl: './classrooms.component.scss'
 })
 export class ClassroomsComponent {
-  private readonly api = inject(BackendService);
+  private readonly api = inject(ClassroomService);
+  private readonly teacherApi = inject(TeacherService);
+  private readonly studentApi = inject(StudentService);
+  private readonly courseApi = inject(CourseService);
+  private readonly roomApi = inject(RoomService);
 
   classrooms: Classroom[] = [];
 
@@ -75,7 +82,7 @@ export class ClassroomsComponent {
   }
 
   showRooms() {
-    this.api.getRoomsMinimal().subscribe({
+    this.roomApi.getAllMinimal().subscribe({
       next: (rooms: RoomMinimal[]) => {
         this.rooms = rooms;
         this.createClassroomForm.choice = 'room';
@@ -87,7 +94,7 @@ export class ClassroomsComponent {
   }
 
   showTeachers() {
-    this.api.getTeachersMinimal().subscribe({
+    this.teacherApi.getAllMinimal().subscribe({
       next: (teachers: TeacherMinimal[]) => {
         this.teachers = teachers;
         this.createClassroomForm.choice = 'teacher';
@@ -99,7 +106,7 @@ export class ClassroomsComponent {
   }
 
   showCourses() {
-    this.api.getCourses().subscribe({
+    this.courseApi.getAll().subscribe({
       next: (courses: CourseMinimal[]) => {
         this.courses = courses;
         this.createClassroomForm.choice = 'course';
@@ -111,7 +118,7 @@ export class ClassroomsComponent {
   }
 
   deleteClassroom(classroom: Classroom) {
-    this.api.deleteClassroom(classroom).subscribe({
+    this.api.delete(classroom).subscribe({
       complete: () => {
         this.fetchClassrooms();
         this.closeOption();
@@ -124,7 +131,7 @@ export class ClassroomsComponent {
   }
 
   fetchClassrooms(): void {
-    this.api.getClassrooms().subscribe({
+    this.api.getAll().subscribe({
       next: (classrooms: Classroom[]) => {
         this.classrooms = classrooms;
       },
@@ -149,7 +156,7 @@ export class ClassroomsComponent {
       courseId: this.createClassroomForm.course!.id,
     };
 
-    this.api.createClassroom(classroomData).subscribe({
+    this.api.create(classroomData).subscribe({
       complete: () => {
         this.closeModal();
         this.fetchClassrooms();

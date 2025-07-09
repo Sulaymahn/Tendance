@@ -2,11 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
-using Tendance.API.DataTransferObjects.Classroom;
-using Tendance.API.DataTransferObjects.Course;
+using Tendance.API.DataTransferObjects.CaptureDevice;
 using Tendance.API.DataTransferObjects.Device;
-using Tendance.API.DataTransferObjects.Room;
-using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
 using Tendance.API.Services;
 
@@ -38,28 +35,8 @@ namespace Tendance.API.Controllers
                     Created = device.Created,
                     Nickname = device.Nickname,
                     Type = device.Type,
-                    Classroom = device.Classroom != null ? new ClassroomForClientMinimal
-                    {
-                        Id = device.Classroom.Id,
-                        Course = new CourseForClientMinimal
-                        {
-                            Id = device.Classroom.Course!.Id,
-                            Name = device.Classroom.Course.Name,
-                        },
-                        Room = new RoomForClientMinimal
-                        {
-                            Id = device.Classroom.Room!.Id,
-                            Building = device.Classroom.Room.Building,
-                            Name = device.Classroom.Room.Name,
-                        },
-                        Teacher = new TeacherForClientMinimal
-                        {
-                            Id = device.Classroom.Teacher!.Id,
-                            FirstName = device.Classroom.Teacher.FirstName,
-                            LastName = device.Classroom.Teacher.LastName,
-                            MiddleName = device.Classroom.Teacher.MiddleName,
-                        }
-                    } : null,
+                    Mode = device.Mode,
+                    ClassroomId = device.ClassroomId,
                 }).ToListAsync());
             }
             else
@@ -68,31 +45,11 @@ namespace Tendance.API.Controllers
                 {
                     Id = device.Id,
                     Created = device.Created,
-                    ClientKey = device.ClientKey,
                     Nickname = device.Nickname,
                     Type = device.Type,
-                    Classroom = device.Classroom != null ? new ClassroomForClientMinimal
-                    {
-                        Id = device.Classroom.Id,
-                        Course = new CourseForClientMinimal
-                        {
-                            Id = device.Classroom.Course!.Id,
-                            Name = device.Classroom.Course.Name,
-                        },
-                        Room = new RoomForClientMinimal
-                        {
-                            Id = device.Classroom.Room!.Id,
-                            Building = device.Classroom.Room.Building,
-                            Name = device.Classroom.Room.Name,
-                        },
-                        Teacher = new TeacherForClientMinimal
-                        {
-                            Id = device.Classroom.Teacher!.Id,
-                            FirstName = device.Classroom.Teacher.FirstName,
-                            LastName = device.Classroom.Teacher.LastName,
-                            MiddleName = device.Classroom.Teacher.MiddleName,
-                        }
-                    } : null,
+                    Mode = device.Mode,
+                    ClassroomId = device.ClassroomId,
+                    ClientKey = device.ClientKey,
                 }).ToListAsync());
             }
         }
@@ -109,6 +66,7 @@ namespace Tendance.API.Controllers
                     Created = DateTime.UtcNow,
                     ClientKey = $"dev-{Guid.NewGuid()}",
                     Type = dto.Type,
+                    Mode = CaptureDeviceMode.Idle,
                     Nickname = dto.Nickname,
                 };
 
@@ -129,6 +87,7 @@ namespace Tendance.API.Controllers
                     Created = DateTime.UtcNow,
                     ClientKey = $"dev-{Guid.NewGuid()}",
                     Type = dto.Type,
+                    Mode = CaptureDeviceMode.Idle,
                     Nickname = dto.Nickname,
                     ClassroomId = classroom.Id,
                 };

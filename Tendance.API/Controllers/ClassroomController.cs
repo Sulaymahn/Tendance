@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Classroom;
+using Tendance.API.DataTransferObjects.Course;
 using Tendance.API.DataTransferObjects.Room;
+using Tendance.API.DataTransferObjects.Student;
+using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
 using Tendance.API.Services;
 using ClassroomStudent = Tendance.API.DataTransferObjects.Classroom.ClassroomStudent;
@@ -16,14 +19,50 @@ namespace Tendance.API.Controllers
     public class ClassroomController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetClassrooms()
+        public async Task<IActionResult> GetClassrooms([FromHeader(Name = "X-Minimal")] bool? minimal)
         {
-            var classrooms = await dbContext.Classrooms
+            IQueryable<Classroom> classrooms = dbContext.Classrooms
                 .Include(c => c.Course)
                 .Include(c => c.Teacher)
                 .Include(c => c.Room)
-                .Where(c => c.SchoolId == userContext.SchoolId)
-                .Select(c => new ClassroomForClient
+                .Where(c => c.SchoolId == userContext.SchoolId);
+
+            if (minimal.HasValue && minimal == true)
+            {
+                return Ok(await classrooms.Select(c => new ClassroomForClientMinimal
+                {
+                    Id = c.Id,
+                    Course = new CourseForClientMinimal
+                    {
+                        Id = c.Course!.Id,
+                        Name = c.Course.Name,
+                    },
+                    Room = new RoomForClientMinimal
+                    {
+                        Id = c.Room!.Id,
+                        Name = c.Room.Name,
+                        Building = c.Room.Building,
+                    },
+                    Teacher = new TeacherForClientMinimal
+                    {
+                        Id = c.Teacher!.Id,
+                        FirstName = c.Teacher.FirstName,
+                        LastName = c.Teacher.LastName,
+                        MiddleName = c.Teacher.MiddleName,
+                    },
+                    Students = c.Students.Select(student => new StudentForClientMinimal
+                    {
+                        Id = student.SchoolAssignedId,
+                        FirstName = student.FirstName,
+                        LastName = student.LastName,
+                        MiddleName = student.MiddleName,
+                    })
+                })
+                .ToListAsync());
+            }
+            else
+            {
+                return Ok(await classrooms.Select(c => new ClassroomForClient
                 {
                     Id = c.Id,
                     Created = c.Created,
@@ -53,9 +92,8 @@ namespace Tendance.API.Controllers
                         MiddleName = student.MiddleName,
                     })
                 })
-                .ToListAsync();
-
-            return Ok(classrooms);
+                .ToListAsync());
+            }
         }
 
         [HttpPost]

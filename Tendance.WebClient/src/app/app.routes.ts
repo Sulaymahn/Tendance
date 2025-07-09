@@ -12,6 +12,7 @@ import { DevicesComponent } from './devices/devices.component';
 import { AuthenticationService } from '../services/authentication/authentication.service';
 import { inject } from '@angular/core';
 import { RoomsComponent } from './rooms/rooms.component';
+import { SessionsComponent } from './sessions/sessions.component';
 
 const canActivateApp: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const auth = inject(AuthenticationService);
@@ -84,6 +85,10 @@ export const routes: Routes = [
             {
                 path: 'rooms',
                 component: RoomsComponent
+            },
+            {
+                path: 'sessions',
+                component: SessionsComponent
             },
             {
                 path: '**',

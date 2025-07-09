@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { BackendService } from '../../services/backend/backend.service';
-import { CaptureDevice, CaptureDeviceForCreation, ClassroomMinimal } from '../../services/backend/backend.service.model';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../dialog/dialog.component';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
+import { CaptureDevice, CaptureDeviceForCreation, DeviceService } from '../../services/devices/device.service';
+import { ClassroomMinimal, ClassroomService } from '../../services/classroom/classroom.service';
 
 enum CaptureDevicesModalState {
   None,
@@ -37,7 +37,8 @@ class CreateCaptureDeviceForm {
   styleUrl: './devices.component.scss'
 })
 export class DevicesComponent {
-  private readonly api = inject(BackendService);
+  private readonly api = inject(DeviceService);
+  private readonly classroomApi = inject(ClassroomService);
 
   classrooms: ClassroomMinimal[] = [];
   captureDevices: CaptureDevice[] = [];
@@ -69,7 +70,7 @@ export class DevicesComponent {
   }
 
   showClassrooms() {
-    this.api.getClassroomsMinimal().subscribe({
+    this.classroomApi.getAllMinimal().subscribe({
       next: (classrooms: ClassroomMinimal[]) => {
         this.classrooms = classrooms;
         this.createCaptureDeviceForm.choice = 'classroom';
@@ -93,7 +94,7 @@ export class DevicesComponent {
   }
 
   deleteCaptureDevice(captureDevice: CaptureDevice) {
-    this.api.deleteCaptureDevice(captureDevice).subscribe({
+    this.api.delete(captureDevice).subscribe({
       complete: () => {
         this.fetchCaptureDevices();
         this.closeOption();
@@ -106,7 +107,7 @@ export class DevicesComponent {
   }
 
   fetchCaptureDevices(): void {
-    this.api.getCaptureDevices().subscribe({
+    this.api.getAll().subscribe({
       next: (captureDevice: CaptureDevice[]) => {
         this.captureDevices = captureDevice;
       },
@@ -131,7 +132,7 @@ export class DevicesComponent {
       classroomId: this.createCaptureDeviceForm.classroom?.id ?? null
     };
 
-    this.api.createCaptureDevice(captureDeviceData).subscribe({
+    this.api.create(captureDeviceData).subscribe({
       complete: () => {
         this.closeModal();
         this.fetchCaptureDevices();

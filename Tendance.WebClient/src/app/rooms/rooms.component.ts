@@ -1,10 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Room, RoomForCreation } from '../../services/backend/backend.service.model';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { BackendService } from '../../services/backend/backend.service';
 import { DatePipe } from '@angular/common';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
 import { DialogComponent } from '../dialog/dialog.component';
+import { Room, RoomForCreation, RoomService } from '../../services/room/room.service';
 
 enum RoomsModalState {
   None,
@@ -23,7 +22,7 @@ class RoomModalContext {
   styleUrl: './rooms.component.scss'
 })
 export class RoomsComponent implements OnInit {
-  private readonly api = inject(BackendService);
+  private readonly api = inject(RoomService);
 
   rooms: Room[] = [];
   modalState: RoomsModalState = RoomsModalState.None;
@@ -48,7 +47,7 @@ export class RoomsComponent implements OnInit {
   }
 
   deleteRoom(room: Room) {
-    this.api.deleteRoom(room).subscribe({
+    this.api.delete(room).subscribe({
       complete: () => {
         this.fetchRooms();
         this.closeOption();
@@ -61,7 +60,7 @@ export class RoomsComponent implements OnInit {
   }
 
   fetchRooms(): void {
-    this.api.getRooms().subscribe({
+    this.api.getAll().subscribe({
       next: (rooms: Room[]) => {
         this.rooms = rooms;
       },
@@ -85,7 +84,7 @@ export class RoomsComponent implements OnInit {
       roomData.building = this.createRoomForm.value.building;
     }
 
-    this.api.createRoom(roomData).subscribe({
+    this.api.create(roomData).subscribe({
       complete: () => {
         this.closeModal();
         this.fetchRooms();

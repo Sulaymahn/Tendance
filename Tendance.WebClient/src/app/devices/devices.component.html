@@ -13,6 +13,7 @@
       <tr>
         <th>Nickname</th>
         <th>Type</th>
+        <th>Mode</th>
         <th>Client Key</th>
         <th>Created</th>
         <th></th>
@@ -26,6 +27,9 @@
         </td>
         <td (click)="selectCaptureDevice(captureDevice)">
           {{ captureDevice.type }}
+        </td>
+        <td (click)="selectCaptureDevice(captureDevice)">
+          {{ captureDevice.mode }}
         </td>
         <td (click)="selectCaptureDevice(captureDevice)">
           {{ captureDevice.clientKey }}

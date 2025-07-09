@@ -1,7 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { BackendService } from '../../services/backend/backend.service';
-import { User } from '../../services/backend/backend.service.model';
+import { User, UserService } from '../../services/user/user.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -10,11 +9,11 @@ import { User } from '../../services/backend/backend.service.model';
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent implements OnInit {
-  private api = inject(BackendService);
+  private api = inject(UserService);
   user: User | null = null;
 
   ngOnInit(): void {
-    this.api.getUser().subscribe({
+    this.api.get().subscribe({
       next: (user) => this.user = user,
       error: () => this.user = null
     });

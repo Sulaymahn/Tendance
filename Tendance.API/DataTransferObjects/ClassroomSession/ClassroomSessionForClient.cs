@@ -1,10 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Tendance.API.Entities
+﻿namespace Tendance.API.DataTransferObjects.Session
 {
-    public class ClassroomSession
+    public class ClassroomSessionForClient
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int ClassroomId { get; set; }
         public string? Topic { get; set; }
@@ -16,8 +13,5 @@ namespace Tendance.API.Entities
         public DateTime CheckOutTo { get; set; }
         public string? Note { get; set; }
         public DateTime Created { get; set; }
-
-        public Classroom? Classroom { get; set; }
-        public List<Attendance> Attendances { get; set; } = [];
     }
 }

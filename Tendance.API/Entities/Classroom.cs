@@ -19,6 +19,8 @@ namespace Tendance.API.Entities
         public Room? Room { get; set; }
         public Teacher? Teacher { get; set; }
         public List<Student> Students { get; set; } = [];
+        public List<ClassroomSession> ClassroomSessions { get; set; } = [];
+        public List<CaptureDevice> CaptureDevices { get; set; } = [];
     }
 
     public class ClassroomEntityConfiguration : IEntityTypeConfiguration<Classroom>

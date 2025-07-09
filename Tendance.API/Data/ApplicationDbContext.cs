@@ -18,6 +18,7 @@ namespace Tendance.API.Data
 
         public DbSet<CourseTeacher> CourseTeachers => Set<CourseTeacher>();
         public DbSet<ClassroomStudent> ClassroomStudents => Set<ClassroomStudent>();
+        public DbSet<ClassroomSession> ClassroomSessions => Set<ClassroomSession>();
 
         public DbSet<Attendance> Attendances => Set<Attendance>();
         public DbSet<StudentAttendance> StudentAttendances => Set<StudentAttendance>();
@@ -71,7 +72,7 @@ namespace Tendance.API.Data
                 .HasOne(face => face.Student)
                 .WithMany()
                 .HasForeignKey(s => s.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<TeacherFace>()
                 .HasOne(face => face.Teacher)
@@ -139,12 +140,36 @@ namespace Tendance.API.Data
                 Name = "Remote",
             };
 
+            Classroom classroom = new Classroom
+            {
+                Id = 1,
+                SchoolId = school.Id,
+                CourseId = course.Id,
+                RoomId = room.Id,
+                Created = date,
+                TeacherId = teacher.Id,
+            };
+
+            CaptureDevice device = new CaptureDevice
+            {
+                Id = new Guid("41054BC3-E078-4BC6-A5FE-DAF6985C51D4"),
+                SchoolId = school.Id,
+                ClassroomId = classroom.Id,
+                ClientKey = $"dev-FBB630A0-72CE-43D5-B364-2534BE0137E5",
+                Created = date,
+                Type = CaptureDeviceType.FacialRecognition,
+                Mode = CaptureDeviceMode.Recognition,
+                Nickname = "Default",
+            };
+
             modelBuilder.Entity<Room>().HasData(room);
             modelBuilder.Entity<User>().HasData(user);
             modelBuilder.Entity<School>().HasData(school);
             modelBuilder.Entity<Student>().HasData(student);
             modelBuilder.Entity<Teacher>().HasData(teacher);
             modelBuilder.Entity<Course>().HasData(course);
+            modelBuilder.Entity<Classroom>().HasData(classroom);
+            modelBuilder.Entity<CaptureDevice>().HasData(device);
         }
     }
 }

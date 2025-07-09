@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="Tendance.API.Entities.Attendance">
+    <Position X="14.5" Y="8.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Entities\Attendance.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Type" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.CaptureDevice">
+    <Position X="6.75" Y="2.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAADAAAABAAAgAAAEAEAAAgAAAAAAAQAQQAAAAAAAAA=</HashCode>
+      <FileName>Entities\CaptureDevice.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="School" />
+      <Property Name="Classroom" />
+      <Property Name="Type" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.Classroom">
+    <Position X="9.25" Y="7.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAMGAAACAAAAgAAAAJAACAAAAAAAAAQAQAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Classroom.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Course" />
+      <Property Name="Room" />
+      <Property Name="School" />
+      <Property Name="Teacher" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Students" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.ClassroomSession">
+    <Position X="11.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgACAACAAAAAAAAAAAEAAAgAAAAIAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Entities\ClassroomSession.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Classroom" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Attendances" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.ClassroomStudent">
+    <Position X="7.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAEAAAgAAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>Entities\ClassroomStudent.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Student" />
+      <Property Name="Classroom" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.Course">
+    <Position X="9.5" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAggAAAAEAAAAQAAAAAAAQAQAAAAgAAAAA=</HashCode>
+      <FileName>Entities\Course.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="School" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Classrooms" />
+      <Property Name="Teachers" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.CourseTeacher">
+    <Position X="12.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEEAAAAAAAAAAAAAIAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CourseTeacher.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Course" />
+      <Property Name="Teacher" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.Face" Collapsed="true">
+    <Position X="14.5" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAEAAAAAAAAAACAAAAAQACAAAAAAAAQA=</HashCode>
+      <FileName>Entities\Face.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tendance.API.Entities.RefreshToken">
+    <Position X="0.5" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAADAAAAAAAAAAAAAAAACAkAAAAAAAQAAAAAAAABAAA=</HashCode>
+      <FileName>Entities\RefreshToken.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="User" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.Room">
+    <Position X="6.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACABAAAAAAgAAAAEAAAAQAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Room.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="School" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Classrooms" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.School">
+    <Position X="6.5" Y="5.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAICAAAAACAAAAAAAFAAAAQCAAAAAAAAAAAAAhAAAAA=</HashCode>
+      <FileName>Entities\School.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Teachers" />
+      <Property Name="Students" />
+      <Property Name="Rooms" />
+      <Property Name="Courses" />
+      <Property Name="Classrooms" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.Student">
+    <Position X="10.5" Y="10.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAECAACAAoAAAAGAQAAAAAAAAAAQAQAAAABAAAAg=</HashCode>
+      <FileName>Entities\Student.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="School" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Attendances" />
+      <Property Name="Courses" />
+      <Property Name="Sessions" />
+      <Property Name="Classrooms" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.StudentAttendance">
+    <Position X="15.75" Y="10.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>Entities\StudentAttendance.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Student" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.StudentFace">
+    <Position X="13.25" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>Entities\StudentFace.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Student" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.Teacher">
+    <Position X="16" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAECAACAAgAAAAGAQAAAAAAAAAAQAQAAAABAAAAg=</HashCode>
+      <FileName>Entities\Teacher.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Courses" />
+      <Property Name="Classrooms" />
+      <Property Name="Attendances" />
+      <Property Name="Sessions" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.TeacherAttendance">
+    <Position X="13.25" Y="10.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\TeacherAttendance.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Teacher" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.TeacherFace">
+    <Position X="15.5" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\TeacherFace.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Teacher" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Tendance.API.Entities.User">
+    <Position X="3.5" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACIAgAAAAQAAAAAAAAAAAAQCQAAAAAAAAAA=</HashCode>
+      <FileName>Entities\User.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="School" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="RefreshTokens" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Enum Name="Tendance.API.Entities.AttendanceRole" Collapsed="true">
+    <Position X="20.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\AttendanceRole.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Tendance.API.Entities.AttendanceType">
+    <Position X="17.75" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\AttendanceType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Tendance.API.Entities.CaptureDeviceType" Collapsed="true">
+    <Position X="6.75" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CaptureDeviceType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,10 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { DialogComponent } from "../dialog/dialog.component";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BackendService } from '../../services/backend/backend.service';
-import { Teacher, TeacherForCreation } from '../../services/backend/backend.service.model';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
 import { DatePipe } from '@angular/common';
+import { Teacher, TeacherForCreation, TeacherService } from '../../services/teacher/teacher.service';
 
 enum TeachersModalState {
   None,
@@ -23,7 +22,7 @@ class TeacherModalContext {
   styleUrl: './teachers.component.scss'
 })
 export class TeachersComponent implements OnInit {
-  private readonly api = inject(BackendService);
+  private readonly api = inject(TeacherService);
 
   teachers: Teacher[] = [];
   modalState: TeachersModalState = TeachersModalState.None;
@@ -58,7 +57,7 @@ export class TeachersComponent implements OnInit {
   }
 
   deleteTeacher(teacher: Teacher) {
-    this.api.deleteTeacher(teacher).subscribe({
+    this.api.delete(teacher).subscribe({
       complete: () => {
         this.fetchTeachers();
         this.closeOption();
@@ -72,7 +71,7 @@ export class TeachersComponent implements OnInit {
   }
 
   fetchTeachers(): void {
-    this.api.getTeachers().subscribe({
+    this.api.getAll().subscribe({
       next: (teachers: Teacher[]) => {
         this.teachers = teachers;
       },
@@ -94,7 +93,7 @@ export class TeachersComponent implements OnInit {
     teacherData.middleName = this.createTeacherForm.value.middleName || '';
     teacherData.lastName = this.createTeacherForm.value.lastName || '';
 
-    this.api.createTeacher(teacherData).subscribe({
+    this.api.create(teacherData).subscribe({
       complete: () => {
         this.closeModal();
         this.fetchTeachers();

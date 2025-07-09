@@ -2,9 +2,8 @@ import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
-import { Student, StudentForCreation, Teacher, TeacherForCreation } from '../../services/backend/backend.service.model';
 import { DialogComponent } from '../dialog/dialog.component';
-import { BackendService } from '../../services/backend/backend.service';
+import { Student, StudentForCreation, StudentService } from '../../services/student/student.service';
 
 enum StudentModalState {
   None,
@@ -23,7 +22,7 @@ class StudentModalContext {
   styleUrl: './students.component.scss'
 })
 export class StudentsComponent {
-  private readonly api = inject(BackendService);
+  private readonly api = inject(StudentService);
 
   students: Student[] = [];
   modalState: StudentModalState = StudentModalState.None;
@@ -61,7 +60,7 @@ export class StudentsComponent {
   }
 
   deleteStudent(student: Student) {
-    this.api.deleteStudent(student).subscribe({
+    this.api.delete(student).subscribe({
       complete: () => {
         this.fetchStudents();
         this.closeOption();
@@ -74,7 +73,7 @@ export class StudentsComponent {
   }
 
   fetchStudents(): void {
-    this.api.getStudents().subscribe({
+    this.api.getAll().subscribe({
       next: (students: Student[]) => {
         this.students = students;
       },
@@ -97,7 +96,7 @@ export class StudentsComponent {
       lastName: this.createStudentForm.value.lastName || '',
     };
 
-    this.api.createStudent(studentData).subscribe({
+    this.api.create(studentData).subscribe({
       complete: () => {
         this.closeModal();
         this.fetchStudents();

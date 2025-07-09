@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { BackendService } from '../../services/backend/backend.service';
 import { AuthenticationService, LoginCredential } from '../../services/authentication/authentication.service';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 

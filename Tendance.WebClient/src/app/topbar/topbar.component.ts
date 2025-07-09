@@ -58,13 +58,13 @@ export class TopbarComponent implements OnInit {
         this.pageTitle = 'Classroom Overview';
         break;
       case 'webhooks':
-        this.pageTitle = 'Webhooks Configuration';
+        this.pageTitle = 'Webhooks';
         break;
       case 'rooms':
         this.pageTitle = 'School Rooms';
         break;
       case 'devices':
-        this.pageTitle = 'Tracker Devices';
+        this.pageTitle = 'Capture Devices';
         break;
       default:
         this.pageTitle = 'Unknown Section';

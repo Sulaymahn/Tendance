@@ -1,10 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { BackendService } from '../../services/backend/backend.service';
-import { Course, CourseForCreation, Teacher, TeacherForCreation } from '../../services/backend/backend.service.model';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
 import { DialogComponent } from '../dialog/dialog.component';
 import { DatePipe } from '@angular/common';
+import { Course, CourseForCreation, CourseService } from '../../services/course/course.service';
 
 enum CoursesModalState {
   None,
@@ -23,7 +22,7 @@ class CourseModalContext {
   styleUrl: './courses.component.scss'
 })
 export class CoursesComponent implements OnInit {
-  private readonly api = inject(BackendService);
+  private readonly api = inject(CourseService);
 
   courses: Course[] = [];
   modalState: CoursesModalState = CoursesModalState.None;
@@ -48,7 +47,7 @@ export class CoursesComponent implements OnInit {
   }
 
   deleteCourse(course: Course) {
-    this.api.deleteCourse(course).subscribe({
+    this.api.delete(course).subscribe({
       complete: () => {
         this.fetchCourses();
         this.closeOption();
@@ -61,7 +60,7 @@ export class CoursesComponent implements OnInit {
   }
 
   fetchCourses(): void {
-    this.api.getCourses().subscribe({
+    this.api.getAll().subscribe({
       next: (courses: Course[]) => {
         this.courses = courses;
       },
@@ -85,7 +84,7 @@ export class CoursesComponent implements OnInit {
       courseData.description = this.createCourseForm.value.description;
     }
 
-    this.api.createCourse(courseData).subscribe({
+    this.api.create(courseData).subscribe({
       complete: () => {
         this.closeModal();
         this.fetchCourses();
