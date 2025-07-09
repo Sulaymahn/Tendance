@@ -1,0 +1,13 @@
+.sessions-grid {
+    display: grid;
+}
+
+.main-actions {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: end;
+
+    button {
+        width: auto;
+    }
+}

@@ -1,9 +1,10 @@
-﻿namespace Tendance.API.DataTransferObjects.Session
+﻿using Tendance.API.DataTransferObjects.Classroom;
+
+namespace Tendance.API.DataTransferObjects.ClassroomSession
 {
     public class ClassroomSessionForClient
     {
         public int Id { get; set; }
-        public int ClassroomId { get; set; }
         public string? Topic { get; set; }
         public DateTime From { get; set; }
         public DateTime To { get; set; }
@@ -13,5 +14,6 @@
         public DateTime CheckOutTo { get; set; }
         public string? Note { get; set; }
         public DateTime Created { get; set; }
+        public required ClassroomForClientMinimal Classroom { get; set; }
     }
 }

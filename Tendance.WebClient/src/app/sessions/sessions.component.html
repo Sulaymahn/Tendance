@@ -1,1 +1,15 @@
-<p>sessions works!</p>
+<div class="wrapper">
+  <div class="main-actions">
+    <button class="primary" (click)="modalState = modalStates.Create">
+      New Classroom Session
+    </button>
+  </div>
+
+  <div class="sessions-grid">
+    @for (session of sessions; track $index) {
+    <div class="session">
+        
+    </div>
+    }
+  </div>
+</div>

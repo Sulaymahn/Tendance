@@ -4,9 +4,11 @@ using Tendance.API.Data;
 using Tendance.API.Entities;
 using Tendance.API.Services;
 using Tendance.API.DataTransferObjects.Room;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Tendance.API.Controllers
 {
+    [Authorize]
     [Route("api/rooms")]
     [ApiController]
     public class RoomController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase

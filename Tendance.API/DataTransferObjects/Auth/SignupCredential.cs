@@ -1,4 +1,4 @@
-﻿namespace Tendance.API.DataTransferObjects
+﻿namespace Tendance.API.DataTransferObjects.Auth
 {
     public class SignupCredential
     {

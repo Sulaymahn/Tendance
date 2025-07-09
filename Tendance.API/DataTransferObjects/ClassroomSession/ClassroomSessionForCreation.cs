@@ -1,4 +1,4 @@
-﻿namespace Tendance.API.DataTransferObjects.Session
+﻿namespace Tendance.API.DataTransferObjects.ClassroomSession
 {
     public class ClassroomSessionForCreation
     {

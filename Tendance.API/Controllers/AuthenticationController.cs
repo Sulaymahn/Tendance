@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Tendance.API.Data;
-using Tendance.API.DataTransferObjects;
 using Tendance.API.DataTransferObjects.Auth;
 using Tendance.API.Entities;
 using Tendance.API.Models;

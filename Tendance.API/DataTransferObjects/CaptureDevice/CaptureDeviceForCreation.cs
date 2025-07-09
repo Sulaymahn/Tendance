@@ -1,6 +1,6 @@
 ﻿using Tendance.API.Entities;
 
-namespace Tendance.API.DataTransferObjects.Device
+namespace Tendance.API.DataTransferObjects.CaptureDevice
 {
     public class CaptureDeviceForCreation
     {

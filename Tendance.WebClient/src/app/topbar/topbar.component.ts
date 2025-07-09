@@ -66,6 +66,9 @@ export class TopbarComponent implements OnInit {
       case 'devices':
         this.pageTitle = 'Capture Devices';
         break;
+      case 'sessions':
+        this.pageTitle = 'Classroom Sessions';
+        break;
       default:
         this.pageTitle = 'Unknown Section';
         break;

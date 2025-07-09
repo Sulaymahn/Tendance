@@ -2,10 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
+import { ClassroomMinimal } from '../classroom/classroom.service';
 
 export interface ClassroomSession {
   id: string;
-  classroomId: number;
+  classroom: ClassroomMinimal;
   topic: string | null;
   From: string;
   To: string;

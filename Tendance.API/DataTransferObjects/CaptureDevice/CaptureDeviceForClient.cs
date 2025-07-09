@@ -1,7 +1,7 @@
 ﻿using Tendance.API.DataTransferObjects.Classroom;
 using Tendance.API.Entities;
 
-namespace Tendance.API.DataTransferObjects.Device
+namespace Tendance.API.DataTransferObjects.CaptureDevice
 {
     public class CaptureDeviceForClient
     {

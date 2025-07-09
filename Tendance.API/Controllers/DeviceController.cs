@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.CaptureDevice;
-using Tendance.API.DataTransferObjects.Device;
 using Tendance.API.Entities;
 using Tendance.API.Services;
 
