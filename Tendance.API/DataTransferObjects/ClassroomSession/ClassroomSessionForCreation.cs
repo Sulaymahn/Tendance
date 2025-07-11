@@ -1,4 +1,6 @@
-﻿namespace Tendance.API.DataTransferObjects.ClassroomSession
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Tendance.API.DataTransferObjects.ClassroomSession
 {
     public class ClassroomSessionForCreation
     {
@@ -10,6 +12,7 @@
         public DateTime CheckInTo { get; set; }
         public DateTime CheckOutFrom { get; set; }
         public DateTime CheckOutTo { get; set; }
+        public string Timezone { get; set; } = string.Empty;
         public string? Note { get; set; }
     }
 }

@@ -28,6 +28,7 @@ export interface ClassroomSessionForCreation {
   checkOutFrom: string;
   checkOutTo: string;
   note: string | null;
+  timezone: string;
 }
 
 @Injectable({

@@ -4,7 +4,7 @@ namespace Tendance.API.Models
 {
     public struct CaptureMatchResult
     {
-        public object? MatchId { get; set; }
+        public int? MatchId { get; set; }
         public AttendanceRole? Role { get; set; }
         public bool Success { get; set; }
         public CaptureError Error { get; set; }

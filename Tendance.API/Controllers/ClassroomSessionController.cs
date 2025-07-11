@@ -10,6 +10,7 @@ using Tendance.API.DataTransferObjects.Student;
 using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
 using Tendance.API.Services;
+using NodaTime;
 
 namespace Tendance.API.Controllers
 {
@@ -124,6 +125,30 @@ namespace Tendance.API.Controllers
             {
                 return BadRequest("Classroom not found");
             }
+
+            DateTimeZone? timezone = DateTimeZoneProviders.Tzdb[sessionForCreation.Timezone];
+            if (timezone == null)
+            {
+                return BadRequest("Invalid Tzdb Timezone");
+            }
+
+            sessionForCreation.From = DateTime.SpecifyKind(sessionForCreation.From, DateTimeKind.Local);
+            sessionForCreation.From = timezone.AtStrictly(LocalDateTime.FromDateTime(sessionForCreation.From)).ToDateTimeUtc();
+
+            sessionForCreation.To = DateTime.SpecifyKind(sessionForCreation.To, DateTimeKind.Local);
+            sessionForCreation.To = timezone.AtStrictly(LocalDateTime.FromDateTime(sessionForCreation.To)).ToDateTimeUtc();
+
+            sessionForCreation.CheckInFrom = DateTime.SpecifyKind(sessionForCreation.CheckInFrom, DateTimeKind.Local);
+            sessionForCreation.CheckInFrom = timezone.AtStrictly(LocalDateTime.FromDateTime(sessionForCreation.CheckInFrom)).ToDateTimeUtc();
+
+            sessionForCreation.CheckInTo = DateTime.SpecifyKind(sessionForCreation.CheckInTo, DateTimeKind.Local);
+            sessionForCreation.CheckInTo = timezone.AtStrictly(LocalDateTime.FromDateTime(sessionForCreation.CheckInTo)).ToDateTimeUtc();
+
+            sessionForCreation.CheckOutFrom = DateTime.SpecifyKind(sessionForCreation.CheckOutFrom, DateTimeKind.Local);
+            sessionForCreation.CheckOutFrom = timezone.AtStrictly(LocalDateTime.FromDateTime(sessionForCreation.CheckOutFrom)).ToDateTimeUtc();
+
+            sessionForCreation.CheckOutTo = DateTime.SpecifyKind(sessionForCreation.CheckOutTo, DateTimeKind.Local);
+            sessionForCreation.CheckOutTo = timezone.AtStrictly(LocalDateTime.FromDateTime(sessionForCreation.CheckOutTo)).ToDateTimeUtc();
 
             ClassroomSession session = new ClassroomSession
             {

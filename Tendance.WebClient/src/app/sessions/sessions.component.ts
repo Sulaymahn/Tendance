@@ -125,7 +125,8 @@ export class SessionsComponent {
       checkInTo: this.createClassroomSessionForm.checkInTo!,
       checkOutFrom: this.createClassroomSessionForm.checkOutFrom!,
       checkOutTo: this.createClassroomSessionForm.checkOutTo!,
-      note: this.createClassroomSessionForm.note
+      note: this.createClassroomSessionForm.note,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     }).subscribe({
       next: () => {
         this.closeModal();

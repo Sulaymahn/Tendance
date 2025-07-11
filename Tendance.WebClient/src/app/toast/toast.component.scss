@@ -1,0 +1,59 @@
+@use 'sass:color';
+@use '../../styles.scss' as *;
+
+.wrapper {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+.notifications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: end;
+    row-gap: 8px;
+}
+
+.toast {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    background-color: $color-neutral-3;
+
+    p {
+        padding: 0 16px;
+    }
+}
+
+.error {
+    background-color: $color-danger;
+
+    p {
+        color: $color-white;
+    }
+}
+
+.success {
+    background-color: $color-success;
+
+    p {
+        color: $color-white;
+    }
+}
+
+.warning {
+    background-color: $color-warning;
+
+    p {
+        color: $color-text;
+    }
+}
+
+.icon.close {
+    background-color: $color-neutral-2;
+
+    &:hover {
+        background-color: color.adjust($color-neutral-2, $lightness: -10%);
+    }
+}

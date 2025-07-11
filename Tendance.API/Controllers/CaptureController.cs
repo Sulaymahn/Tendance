@@ -14,7 +14,6 @@ namespace Tendance.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CaptureAsync(
             [FromHeader(Name = "X-Client-Key")] string clientKey,
-            [FromHeader(Name = "X-Attendance-Type")] AttendanceType attendanceType,
             [FromForm(Name = "file")] IFormFile file)
         {
             CaptureDevice? device = await dbContext.Devices.FirstOrDefaultAsync(device => device.ClientKey == clientKey);
@@ -23,10 +22,24 @@ namespace Tendance.API.Controllers
                 return BadRequest("Unknown Device");
             }
 
-            if (device.ClassroomId == null)
+            bool classroomExist = await dbContext.Classrooms
+                .AsNoTracking()
+                .AnyAsync(classroom => classroom.SchoolId == device.SchoolId && classroom.Id == device.ClassroomId);
+
+            if (!classroomExist)
             {
                 return BadRequest("Classroom not set");
             }
+
+            var now = DateTime.UtcNow;
+
+            ClassroomSession? session = await dbContext.ClassroomSessions
+                .AsNoTracking()
+                .Where(session => session.ClassroomId == device.ClassroomId && ((session.CheckInFrom < now && session.CheckInTo > now) || (session.CheckOutFrom < now && session.CheckOutTo > now)))
+                .OrderByDescending(session => session.To)
+                .FirstOrDefaultAsync();
+
+            bool? isCheckIn = session?.CheckInFrom < now && session.CheckInTo > now;
 
             using var ms = new MemoryStream();
             await file.CopyToAsync(ms);
@@ -38,6 +51,32 @@ namespace Tendance.API.Controllers
                 _ => throw new ArgumentException("Unrecognized capture device type")
             };
 
+            if (!result.Success || !isCheckIn.HasValue)
+            {
+                return Ok(result);
+            }
+
+            if (result.Role == AttendanceRole.Student)
+            {
+                await dbContext.StudentAttendances.AddAsync(new StudentAttendance
+                {
+                    StudentId = result.MatchId!.Value,
+                    Timestamp = DateTime.UtcNow,
+                    Type = isCheckIn.Value ? AttendanceType.CheckIn : AttendanceType.CheckOut,
+                });
+
+            }
+            else if (result.Role == AttendanceRole.Teacher)
+            {
+                await dbContext.TeacherAttendances.AddAsync(new TeacherAttendance
+                {
+                    TeacherId = result.MatchId!.Value,
+                    Timestamp = DateTime.UtcNow,
+                    Type = isCheckIn.Value ? AttendanceType.CheckIn : AttendanceType.CheckOut,
+                });
+            }
+
+            await dbContext.SaveChangesAsync();
             return Ok(result);
         }
 

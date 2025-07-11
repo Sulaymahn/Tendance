@@ -5,6 +5,7 @@ import { DialogComponent } from '../dialog/dialog.component';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
 import { CaptureDevice, CaptureDeviceForCreation, DeviceService } from '../../services/devices/device.service';
 import { ClassroomMinimal, ClassroomService } from '../../services/classroom/classroom.service';
+import { NotificationLevel, NotificationService } from '../../services/notification/notification.service';
 
 enum CaptureDevicesModalState {
   None,
@@ -39,6 +40,7 @@ class CreateCaptureDeviceForm {
 export class DevicesComponent {
   private readonly api = inject(DeviceService);
   private readonly classroomApi = inject(ClassroomService);
+  private readonly notificationService = inject(NotificationService);
 
   classrooms: ClassroomMinimal[] = [];
   captureDevices: CaptureDevice[] = [];
@@ -79,6 +81,13 @@ export class DevicesComponent {
         console.error('Failed to load classrooms:', err);
       }
     });
+  }
+
+  copyClientKeyToClipboard(captureDevice: CaptureDevice) {
+    window.navigator.clipboard.writeText(captureDevice.clientKey)
+      .then(() => {
+        this.notificationService.notify('Copied Client Key to Clipboard', NotificationLevel.Success);
+      });
   }
 
   showDeviceTypes() {
