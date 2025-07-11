@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Classroom;
 using Tendance.API.DataTransferObjects.ClassroomSession;
@@ -9,8 +10,8 @@ using Tendance.API.DataTransferObjects.Room;
 using Tendance.API.DataTransferObjects.Student;
 using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
+using Tendance.API.Models;
 using Tendance.API.Services;
-using NodaTime;
 
 namespace Tendance.API.Controllers
 {
@@ -117,6 +118,7 @@ namespace Tendance.API.Controllers
             }
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateClassroomSession([FromBody] ClassroomSessionForCreation sessionForCreation)
         {
@@ -170,6 +172,7 @@ namespace Tendance.API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpDelete]
         public async Task<IActionResult> DeleteClassroomSession([FromHeader(Name = "X-Classroom-Session-Id")] int sessionId)
         {

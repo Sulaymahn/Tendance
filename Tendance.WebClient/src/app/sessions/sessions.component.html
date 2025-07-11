@@ -8,10 +8,10 @@
   <table>
     <thead>
       <tr>
-        <th>From</th>
-        <th>To</th>
         <th>Classroom</th>
         <th>Topic</th>
+        <th>From</th>
+        <th>To</th>
         <th></th>
       </tr>
     </thead>
@@ -19,16 +19,16 @@
       @for (session of sessions; track $index) {
       <tr>
         <td (click)="selectSession(session)">
-          {{ session.from | date : "medium" }}
-        </td>
-        <td (click)="selectSession(session)">
-          {{ session.to | date : "medium" }}
-        </td>
-        <td (click)="selectSession(session)">
           {{ toString(session) }}
         </td>
         <td (click)="selectSession(session)">
           {{ session.topic }}
+        </td>
+        <td (click)="selectSession(session)">
+          {{ session.from | date : "medium" }}
+        </td>
+        <td (click)="selectSession(session)">
+          {{ session.to | date : "medium" }}
         </td>
         <td>
           <button class="icon" title="options" (click)="optionClick(session)">

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -52,7 +51,7 @@ namespace Tendance.API
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("TENDANCE_API_AUTH_TOKEN_KEY") ?? throw new ArgumentException("TOKEN KEY NOT FOUND"))),
                     ClockSkew = TimeSpan.Zero
                 };
-            });
+            }).AddTendanceDevice();
 
             builder.Services.AddCors(opt =>
             {
@@ -64,7 +63,22 @@ namespace Tendance.API
                 });
             });
 
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorizationBuilder()
+                .AddPolicy(TendancePolicy.DeviceOnly, pol =>
+                {
+                    pol.RequireClaim(TendanceClaim.SchoolId);
+                    pol.RequireClaim(TendanceClaim.DeviceId);
+                    pol.RequireClaim(TendanceClaim.DeviceType);
+                })
+                .AddPolicy(TendancePolicy.UserOnly, pol =>
+                {
+                    pol.RequireClaim(TendanceClaim.SchoolId);
+                    pol.RequireClaim(TendanceClaim.UserId);
+                })
+                .AddDefaultPolicy(TendancePolicy.Default, pol =>
+                {
+                    pol.RequireClaim(TendanceClaim.SchoolId);
+                });
 
             var app = builder.Build();
 

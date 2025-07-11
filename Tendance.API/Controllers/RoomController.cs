@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
-using Tendance.API.Entities;
-using Tendance.API.Services;
 using Tendance.API.DataTransferObjects.Room;
-using Microsoft.AspNetCore.Authorization;
+using Tendance.API.Entities;
+using Tendance.API.Models;
+using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
 {
@@ -39,6 +40,7 @@ namespace Tendance.API.Controllers
             }
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateRoom([FromBody] RoomForCreation dto)
         {
@@ -55,6 +57,7 @@ namespace Tendance.API.Controllers
             return Created();
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpDelete]
         public async Task<IActionResult> DeleteRoom([FromHeader(Name = "X-Room-Id")] int id)
         {

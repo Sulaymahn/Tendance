@@ -4,15 +4,17 @@ using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.CaptureDevice;
 using Tendance.API.Entities;
+using Tendance.API.Models;
 using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
 {
     [Route("api/devices")]
-    [Authorize]
+    [Authorize(Policy = TendancePolicy.UserOnly)]
     [ApiController]
     public class DeviceController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {
+        [AllowAnonymous]
         [HttpGet("types")]
         public ActionResult<string[]> GetDeviceTypesAsync()
         {

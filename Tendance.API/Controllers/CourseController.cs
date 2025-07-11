@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Course;
 using Tendance.API.Entities;
+using Tendance.API.Models;
 using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
@@ -39,6 +40,7 @@ namespace Tendance.API.Controllers
             }
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateCourse([FromBody] CourseForCreation courseForCreation)
         {
@@ -56,6 +58,7 @@ namespace Tendance.API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpDelete]
         public async Task<IActionResult> DeleteCourse([FromHeader(Name = "X-Course-Id")] int courseId)
         {

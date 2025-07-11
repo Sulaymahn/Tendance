@@ -2,15 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
-using Tendance.API.DataTransferObjects;
 using Tendance.API.DataTransferObjects.User;
 using Tendance.API.Entities;
+using Tendance.API.Models;
 using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
 {
     [Route("api/user")]
-    [Authorize]
+    [Authorize(Policy = TendancePolicy.UserOnly)]
     [ApiController]
     public class UserController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {

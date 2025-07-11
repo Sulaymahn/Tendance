@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
 using Tendance.API.Entities;
@@ -7,6 +8,7 @@ using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
 {
+    [Authorize(Policy = TendancePolicy.DeviceOnly)]
     [Route("api/capture")]
     [ApiController]
     public class CaptureController(ApplicationDbContext dbContext, FacialRecognitionService facialRecognitionService) : ControllerBase

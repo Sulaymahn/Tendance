@@ -5,6 +5,8 @@ using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Tendance.API.Data;
+using Tendance.API.Entities;
+using Tendance.API.Models;
 
 namespace Tendance.API.Authentication
 {
@@ -24,15 +26,21 @@ namespace Tendance.API.Authentication
             if (!header.StartsWith("Device ")) return AuthenticateResult.Fail("Invalid scheme");
 
             string clientKey = header["Device ".Length..];
-            var device = await dbContext.Devices.FirstOrDefaultAsync(device => device.ClientKey == clientKey);
+
+            CaptureDevice? device = await dbContext.Devices
+                .AsNoTracking()
+                .FirstOrDefaultAsync(device => device.ClientKey == clientKey);
+
             if (device == null)
                 return AuthenticateResult.Fail("Invalid device");
 
             var claims = new List<Claim> {
-                new("DeviceId", device.Id.ToString()),
-                new("SchoolId", device.SchoolId.ToString()),
-                new("DeviceType", device.Type.ToString()),
+                new(TendanceClaim.DeviceId, device.Id.ToString()),
+                new(TendanceClaim.SchoolId, device.SchoolId.ToString()),
+                new(TendanceClaim.DeviceType, device.Type.ToString()),
             };
+
+            Request.HttpContext.Items["device"] = device;
 
             var identity = new ClaimsIdentity(claims, nameof(DeviceAuthenticationHandler));
             var principal = new ClaimsPrincipal(identity);

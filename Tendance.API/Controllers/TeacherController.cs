@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
+using Tendance.API.Models;
 using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
@@ -47,6 +48,7 @@ namespace Tendance.API.Controllers
             }
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateTeachersAsync([FromBody] TeacherForCreation teacherForCreation)
         {
@@ -66,6 +68,7 @@ namespace Tendance.API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpDelete]
         public async Task<IActionResult> DeleteTeacher([FromHeader(Name = "X-Teacher-Id")] int teacherId)
         {

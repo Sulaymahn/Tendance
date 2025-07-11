@@ -8,13 +8,14 @@ using Tendance.API.DataTransferObjects.Room;
 using Tendance.API.DataTransferObjects.Student;
 using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
+using Tendance.API.Models;
 using Tendance.API.Services;
 using ClassroomStudent = Tendance.API.DataTransferObjects.Classroom.ClassroomStudent;
 
 namespace Tendance.API.Controllers
 {
-    [Route("api/classrooms")]
     [Authorize]
+    [Route("api/classrooms")]
     [ApiController]
     public class ClassroomController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {
@@ -96,6 +97,7 @@ namespace Tendance.API.Controllers
             }
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<ActionResult<ClassroomForClient>> CreateClassroom([FromBody] ClassroomForCreation classroomForCreation)
         {
@@ -156,6 +158,7 @@ namespace Tendance.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpDelete]
         public async Task<IActionResult> DeleteClassroom([FromHeader(Name = "X-Classroom-Id")] int id)
         {

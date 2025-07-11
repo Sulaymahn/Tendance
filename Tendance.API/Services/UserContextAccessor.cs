@@ -1,4 +1,6 @@
 ﻿using System.Security.Claims;
+using Tendance.API.Entities;
+using Tendance.API.Models;
 
 namespace Tendance.API.Services
 {
@@ -8,7 +10,7 @@ namespace Tendance.API.Services
         {
             get
             {
-                var text = httpContextAccessor.HttpContext!.User.FindFirstValue("UserId") ?? throw new ArgumentException();
+                var text = httpContextAccessor.HttpContext!.User.FindFirstValue(TendanceClaim.UserId) ?? throw new ArgumentException();
                 return Guid.Parse(text);
             }
         }
@@ -17,8 +19,23 @@ namespace Tendance.API.Services
         {
             get
             {
-                var text = httpContextAccessor.HttpContext!.User.FindFirstValue("SchoolId") ?? throw new ArgumentException();
+                var text = httpContextAccessor.HttpContext!.User.FindFirstValue(TendanceClaim.SchoolId) ?? throw new ArgumentException();
                 return Guid.Parse(text);
+            }
+        }
+        public Guid DeviceId
+        {
+            get
+            {
+                return Guid.Parse(httpContextAccessor.HttpContext!.User.FindFirstValue(TendanceClaim.DeviceId) ?? throw new ArgumentException());
+            }
+        }
+
+        public CaptureDeviceType DeviceType
+        {
+            get
+            {
+                return Enum.Parse<CaptureDeviceType>(httpContextAccessor.HttpContext!.User.FindFirstValue(TendanceClaim.DeviceType) ?? throw new ArgumentException());
             }
         }
     }
