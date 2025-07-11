@@ -5,11 +5,224 @@
     </button>
   </div>
 
-  <div class="sessions-grid">
-    @for (session of sessions; track $index) {
-    <div class="session">
-        
+  <table>
+    <thead>
+      <tr>
+        <th>From</th>
+        <th>To</th>
+        <th>Classroom</th>
+        <th>Topic</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (session of sessions; track $index) {
+      <tr>
+        <td (click)="selectSession(session)">
+          {{ session.from | date : "medium" }}
+        </td>
+        <td (click)="selectSession(session)">
+          {{ session.to | date : "medium" }}
+        </td>
+        <td (click)="selectSession(session)">
+          {{ toString(session) }}
+        </td>
+        <td (click)="selectSession(session)">
+          {{ session.topic }}
+        </td>
+        <td>
+          <button class="icon" title="options" (click)="optionClick(session)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+              <rect width="4.11" height="4.11" />
+              <rect x="6.17" width="4.11" height="4.11" />
+              <rect x="12.33" width="4.11" height="4.11" />
+            </svg>
+          </button>
+
+          @if(modalContext.sessionOption?.id == session.id){
+          <div
+            class="option-dropdown"
+            appClickOutside
+            (clickOutside)="closeOption()"
+          >
+            <button>Edit</button>
+            <button class="danger" (click)="deleteSession(session)">
+              Delete
+            </button>
+          </div>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+  @if(modalState == modalStates.Create) {
+  <app-dialog (dismissed)="closeModal()">
+    <div class="dialog">
+      <div class="dialog-header">
+        <button (click)="closeModal()" class="icon close" title="close">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.17 10.17">
+            <rect
+              class="cls-1"
+              x="-0.05"
+              y="3.03"
+              width="10.28"
+              height="4.11"
+              transform="translate(-2.11 5.09) rotate(-45)"
+            />
+            <rect
+              class="cls-1"
+              x="-0.05"
+              y="3.03"
+              width="10.28"
+              height="4.11"
+              transform="translate(5.09 -2.11) rotate(45)"
+            />
+          </svg>
+        </button>
+      </div>
+      <p class="dialog-title">Add new session</p>
+      <div class="form">
+        <div class="text-field">
+          <label>Topic</label>
+          <input
+            title="topic"
+            type="text"
+            placeholder="Topic"
+            [(ngModel)]="createClassroomSessionForm.topic"
+          />
+        </div>
+        <div class="text-field">
+          <label>Classroom</label>
+          <button
+            class="dropdown"
+            title="classroom"
+            type="button"
+            (click)="showClassrooms()"
+          >
+            @if(createClassroomSessionForm.classroom){
+            <span>{{ createClassroomSessionForm.classroom.course.name }}</span>
+            At
+            <span>{{ createClassroomSessionForm.classroom.room.name }}</span> By
+            <span>{{
+              createClassroomSessionForm.classroom.teacher.firstName
+            }}</span>
+            <span>{{
+              createClassroomSessionForm.classroom.teacher.middleName
+            }}</span>
+            <span>{{
+              createClassroomSessionForm.classroom.teacher.lastName
+            }}</span>
+            }@else {
+            <span class="placeholder">- Select a classroom -</span>
+            }
+          </button>
+
+          @if (createClassroomSessionForm.choice == 'classroom') {
+          <div
+            class="option-dropdown"
+            appClickOutside
+            (clickOutside)="createClassroomSessionForm.choice = null"
+          >
+            @for (classroom of classrooms; track $index) {
+            <button (click)="selectClassroom(classroom)" type="button">
+              <span>{{ classroom.course.name }}</span>
+              At
+              <span>{{ classroom.room.name }}</span> By
+              <span>{{ classroom.teacher.firstName }}</span>
+              <span>{{ classroom.teacher.middleName }}</span>
+              <span>{{ classroom.teacher.lastName }}</span>
+            </button>
+            }
+          </div>
+          }
+        </div>
+        <div class="text-field">
+          <label>Starts From</label>
+          <input
+            title="classroomfrom"
+            type="datetime-local"
+            [(ngModel)]="createClassroomSessionForm.from"
+            [max]="toInputDate(createClassroomSessionForm.to)"
+          />
+        </div>
+
+        <div class="text-field">
+          <label>Ends By</label>
+          <input
+            title="classroomto"
+            type="datetime-local"
+            [(ngModel)]="createClassroomSessionForm.to"
+            [min]="toInputDate(createClassroomSessionForm.from)"
+          />
+        </div>
+
+        <div class="text-field">
+          <label>Note</label>
+          <input
+            title="note"
+            type="text"
+            placeholder="Note"
+            [(ngModel)]="createClassroomSessionForm.note"
+          />
+        </div>
+      </div>
+      <p class="dialog-subtitle">Attendance</p>
+      <p class="dialog-subtitle">Check In</p>
+      <div class="col-2">
+        <div class="text-field">
+          <label>From</label>
+          <input
+            title="checkinfrom"
+            type="datetime-local"
+            [(ngModel)]="createClassroomSessionForm.checkInFrom"
+            [max]="toInputDate(createClassroomSessionForm.checkInTo)"
+          />
+        </div>
+        <div class="text-field">
+          <label>To</label>
+          <input
+            title="checkinto"
+            type="datetime-local"
+            [(ngModel)]="createClassroomSessionForm.checkInTo"
+            [min]="toInputDate(createClassroomSessionForm.checkInFrom)"
+          />
+        </div>
+      </div>
+
+      <p class="dialog-subtitle">Check Out</p>
+      <div class="col-2">
+        <div class="text-field">
+          <label>From</label>
+          <input
+            title="checkoutfrom"
+            type="datetime-local"
+            [(ngModel)]="createClassroomSessionForm.checkOutFrom"
+            [max]="toInputDate(createClassroomSessionForm.checkOutTo)"
+          />
+        </div>
+        <div class="text-field">
+          <label>To</label>
+          <input
+            title="checkoutto"
+            type="datetime-local"
+            [(ngModel)]="createClassroomSessionForm.checkOutTo"
+            [min]="toInputDate(createClassroomSessionForm.checkOutFrom)"
+          />
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button
+          class="primary"
+          (click)="createSession()"
+          [disabled]="createClassroomSessionForm.invalid()"
+        >
+          Create Session
+        </button>
+      </div>
     </div>
-    }
-  </div>
+  </app-dialog>
+  }
 </div>

@@ -8,26 +8,26 @@ export interface ClassroomSession {
   id: string;
   classroom: ClassroomMinimal;
   topic: string | null;
-  From: string;
-  To: string;
-  CheckInFrom: string;
-  CheckInTo: string;
-  CheckOutFrom: string;
-  CheckOutTo: string;
-  Note: string | null;
+  from: string;
+  to: string;
+  checkInFrom: string;
+  checkInTo: string;
+  checkOutFrom: string;
+  checkOutTo: string;
+  note: string | null;
   created: string;
 }
 
 export interface ClassroomSessionForCreation {
   classroomId: number;
   topic: string | null;
-  From: string;
-  To: string;
-  CheckInFrom: string;
-  CheckInTo: string;
-  CheckOutFrom: string;
-  CheckOutTo: string;
-  Note: string | null;
+  from: string;
+  to: string;
+  checkInFrom: string;
+  checkInTo: string;
+  checkOutFrom: string;
+  checkOutTo: string;
+  note: string | null;
 }
 
 @Injectable({
