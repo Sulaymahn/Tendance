@@ -17,7 +17,7 @@ namespace Tendance.API.Services
         private static readonly InferenceSession _session = new("MLModels/glint360k_r50.onnx");
         private static readonly Net? net = CvDnn.ReadNetFromCaffe(ProtoPath, ModelPath);
 
-        public async Task<CaptureMatchResult> MatchAsync(byte[] data, CaptureDevice captureDevice)
+        public async Task<CaptureMatchResult> MatchAsync(byte[] data, CaptureDeviceEntity captureDevice)
         {
             Mat? face = DetectAndCropFace(data);
             if (face == null)
@@ -32,7 +32,7 @@ namespace Tendance.API.Services
 
             var queryEmbedding = ExtractEmbedding(face);
 
-            List<Face> registeredFaces = await dbContext.Faces
+            List<FaceEntity> registeredFaces = await dbContext.Faces
                 .Include(face => face.CaptureDevice)
                 .Where(sf => sf.CaptureDevice != null && sf.CaptureDevice.SchoolId == captureDevice.SchoolId)
                 .ToListAsync();
@@ -48,7 +48,7 @@ namespace Tendance.API.Services
             }
 
             float threshold = 0.1f;
-            Face? bestMatch = null;
+            FaceEntity? bestMatch = null;
             float bestScore = -1f;
 
             foreach (var regFace in registeredFaces)
@@ -71,7 +71,7 @@ namespace Tendance.API.Services
                 };
             }
 
-            if (bestMatch is StudentFace student)
+            if (bestMatch is StudentFaceEntity student)
             {
                 return new CaptureMatchResult
                 {
@@ -80,7 +80,7 @@ namespace Tendance.API.Services
                     MatchId = student.StudentId,
                 };
             }
-            else if (bestMatch is TeacherFace teacher)
+            else if (bestMatch is TeacherFaceEntity teacher)
             {
                 return new CaptureMatchResult
                 {
@@ -98,7 +98,7 @@ namespace Tendance.API.Services
             };
         }
 
-        public async Task<CaptureRegisterResult> RegisterAsync(byte[] data, CaptureDevice captureDevice, AttendanceRole role, object person)
+        public async Task<CaptureRegisterResult> RegisterAsync(byte[] data, CaptureDeviceEntity captureDevice, AttendanceRole role, object person)
         {
             Mat? face = DetectAndCropFace(data);
             if (face == null)
@@ -116,10 +116,10 @@ namespace Tendance.API.Services
             switch (role)
             {
                 case AttendanceRole.Student:
-                    await SaveStudentFace((Student)person, captureDevice, encoding);
+                    await SaveStudentFace((StudentEntity)person, captureDevice, encoding);
                     break;
                 case AttendanceRole.Teacher:
-                    await SaveTeacherFace((Teacher)person, captureDevice, encoding);
+                    await SaveTeacherFace((TeacherEntity)person, captureDevice, encoding);
                     break;
                 default:
                     return new CaptureRegisterResult
@@ -135,9 +135,9 @@ namespace Tendance.API.Services
             };
         }
 
-        private async Task SaveStudentFace(Student student, CaptureDevice device, float[] encoding)
+        private async Task SaveStudentFace(StudentEntity student, CaptureDeviceEntity device, float[] encoding)
         {
-            var studentFace = new StudentFace
+            var studentFace = new StudentFaceEntity
             {
                 StudentId = student.Id,
                 CaptureDeviceId = device.Id,
@@ -148,9 +148,9 @@ namespace Tendance.API.Services
             await dbContext.SaveChangesAsync();
         }
 
-        private async Task SaveTeacherFace(Teacher teacher, CaptureDevice device, float[] encoding)
+        private async Task SaveTeacherFace(TeacherEntity teacher, CaptureDeviceEntity device, float[] encoding)
         {
-            var teacherFace = new TeacherFace
+            var teacherFace = new TeacherFaceEntity
             {
                 TeacherId = teacher.Id,
                 CaptureDeviceId = device.Id,

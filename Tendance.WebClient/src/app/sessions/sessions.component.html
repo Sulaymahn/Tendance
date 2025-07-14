@@ -9,9 +9,9 @@
     <thead>
       <tr>
         <th>Classroom</th>
-        <th>Topic</th>
         <th>From</th>
         <th>To</th>
+        <th>Topic</th>
         <th></th>
       </tr>
     </thead>
@@ -22,13 +22,13 @@
           {{ toString(session) }}
         </td>
         <td (click)="selectSession(session)">
-          {{ session.topic }}
-        </td>
-        <td (click)="selectSession(session)">
           {{ session.from | date : "medium" }}
         </td>
         <td (click)="selectSession(session)">
           {{ session.to | date : "medium" }}
+        </td>
+        <td (click)="selectSession(session)">
+          {{ session.topic }}
         </td>
         <td>
           <button class="icon" title="options" (click)="optionClick(session)">
@@ -45,7 +45,7 @@
             appClickOutside
             (clickOutside)="closeOption()"
           >
-            <button>Edit</button>
+            <button (click)="viewDetails(session)">View Details</button>
             <button class="danger" (click)="deleteSession(session)">
               Delete
             </button>

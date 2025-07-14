@@ -52,11 +52,15 @@ li:hover {
 }
 
 .header {
-    padding: 16px;
+    padding: 8px 16px;
     font-size: 1rem;
-    font-weight: 600;
-    text-align: center;
+    font-weight: 700;
+    text-align: start;
     color: $color-text;
+}
+
+.header:not(:first-child) {
+    margin-top: 32px;
 }
 
 .profile {

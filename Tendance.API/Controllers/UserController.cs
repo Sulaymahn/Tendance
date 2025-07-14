@@ -17,7 +17,7 @@ namespace Tendance.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserAsync()
         {
-            User? user = await dbContext.Users.FirstOrDefaultAsync(user => userContext.UserId == user.Id);
+            UserEntity? user = await dbContext.Users.FirstOrDefaultAsync(user => userContext.UserId == user.Id);
             if (user == null)
             {
                 return NotFound();

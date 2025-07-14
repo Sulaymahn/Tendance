@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
+﻿using System.Text;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Tendance.API.Data;
-using Tendance.API.DataTransferObjects.Auth;
-using Tendance.API.Entities;
 using Tendance.API.Models;
+using Tendance.API.Entities;
+using Tendance.API.DataTransferObjects.Auth;
 
 namespace Tendance.API.Controllers
 {
@@ -19,7 +19,6 @@ namespace Tendance.API.Controllers
         private readonly JsonWebTokenHandler _tokenHandler;
         private readonly SigningCredentials _signingCredentials;
         private readonly TokenValidationParameters _tokenValidationParameters;
-
         private readonly ApplicationDbContext _dbContext;
         private readonly JwtSettings _jwtSettings;
 
@@ -48,13 +47,13 @@ namespace Tendance.API.Controllers
         public async Task<IActionResult> LoginAsync([FromBody] LoginCredential credential)
         {
             credential.Email = credential.Email.ToLower();
-            User? user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Email == credential.Email && user.Password == user.Password);
+            UserEntity? user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Email == credential.Email && user.Password == user.Password);
             if (user == null)
             {
                 return Unauthorized();
             }
 
-            var token = new RefreshToken
+            var token = new RefreshTokenEntity
             {
                 IsConsumed = false,
                 Created = DateTime.UtcNow,
@@ -85,11 +84,11 @@ namespace Tendance.API.Controllers
             credential.Email = credential.Email.ToLower();
             credential.SchoolEmail = credential.SchoolEmail.ToLower();
 
-            User? user = await _dbContext.Users
+            UserEntity? user = await _dbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(user => user.Email == credential.Email);
 
-            School? school = await _dbContext.Schools
+            SchoolEntity? school = await _dbContext.Schools
                 .AsNoTracking()
                 .FirstOrDefaultAsync(school => school.Email == credential.SchoolEmail);
 
@@ -98,7 +97,7 @@ namespace Tendance.API.Controllers
                 return Unauthorized();
             }
 
-            school = new School
+            school = new SchoolEntity
             {
                 Id = Guid.NewGuid(),
                 Email = credential.SchoolEmail.ToLower(),
@@ -108,7 +107,7 @@ namespace Tendance.API.Controllers
 
             await _dbContext.Schools.AddAsync(school);
 
-            user = new User
+            user = new UserEntity
             {
                 Id = Guid.NewGuid(),
                 SchoolId = school.Id,
@@ -121,7 +120,7 @@ namespace Tendance.API.Controllers
 
             await _dbContext.Users.AddAsync(user);
 
-            var token = new RefreshToken
+            var token = new RefreshTokenEntity
             {
                 IsConsumed = false,
                 Created = DateTime.UtcNow,
@@ -149,7 +148,7 @@ namespace Tendance.API.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequest request)
         {
-            RefreshToken? oldRefreshToken = await _dbContext.RefreshTokens
+            RefreshTokenEntity? oldRefreshToken = await _dbContext.RefreshTokens
                 .Include(refresh => refresh.User)
                 .FirstOrDefaultAsync(refresh => refresh.Token == request.RefreshToken && !refresh.IsConsumed && DateTime.UtcNow < refresh.ExpiresAt);
 
@@ -160,7 +159,7 @@ namespace Tendance.API.Controllers
 
             oldRefreshToken.IsConsumed = true;
 
-            var token = new RefreshToken
+            var token = new RefreshTokenEntity
             {
                 IsConsumed = false,
                 Created = DateTime.UtcNow,

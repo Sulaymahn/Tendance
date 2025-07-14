@@ -1,12 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { ClassroomSession, ClassroomSessionService } from '../../services/classroom-session/classroom-session.service';
-import { ClassroomMinimal, ClassroomService } from '../../services/classroom/classroom.service';
-import { FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
-import { Room } from '../../services/room/room.service';
-import { switchMap } from 'rxjs';
+import { Classroom, ClassroomService } from '../../services/classroom/classroom.service';
+import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { DialogComponent } from '../dialog/dialog.component';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
+import { Router } from '@angular/router';
 
 enum SessionsModalState {
   None,
@@ -20,7 +19,7 @@ class SessionModalContext {
 
 class CreateClassroomSessionForm {
   choice: 'classroom' | null = null;
-  classroom: ClassroomMinimal | null = null;
+  classroom: Classroom | null = null;
   topic: string | null = null;
   from: string | null = null;
   to: string | null = null;
@@ -65,11 +64,12 @@ class CreateClassroomSessionForm {
   styleUrl: './sessions.component.scss'
 })
 export class SessionsComponent {
+  private readonly router = inject(Router);
   private readonly api = inject(ClassroomSessionService);
   private readonly classroomApi = inject(ClassroomService);
 
   sessions: ClassroomSession[] = [];
-  classrooms: ClassroomMinimal[] = [];
+  classrooms: Classroom[] = [];
 
   modalState: SessionsModalState = SessionsModalState.None;
   modalStates = SessionsModalState;
@@ -77,8 +77,8 @@ export class SessionsComponent {
   createClassroomSessionForm = new CreateClassroomSessionForm();
 
   showClassrooms() {
-    this.classroomApi.getAllMinimal().subscribe({
-      next: (value: ClassroomMinimal[]) => {
+    this.classroomApi.get().subscribe({
+      next: (value: Classroom[]) => {
         this.classrooms = value;
         this.createClassroomSessionForm.choice = 'classroom';
       },
@@ -86,6 +86,10 @@ export class SessionsComponent {
         console.error('Failed to load classroom:', err);
       }
     })
+  }
+
+  viewDetails(session: ClassroomSession) {
+    this.router.navigate(['sessions', session.id.toString()]);
   }
 
   deleteSession(session: ClassroomSession) {
@@ -138,7 +142,7 @@ export class SessionsComponent {
     })
   }
 
-  selectClassroom(classroom: ClassroomMinimal) {
+  selectClassroom(classroom: Classroom) {
     this.createClassroomSessionForm.classroom = classroom;
     this.createClassroomSessionForm.choice = null;
   }
@@ -180,7 +184,7 @@ export class SessionsComponent {
   }
 
   fetchSessions(): void {
-    this.api.getAll().subscribe({
+    this.api.get().subscribe({
       next: (sessions: ClassroomSession[]) => {
         this.sessions = sessions;
       },

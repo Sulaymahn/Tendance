@@ -1,12 +1,12 @@
 .wrapper {
-    height: 100vh;
+    height: 100svh;
     display: grid;
-    grid-template-rows: 80px auto auto;
+    grid-template-rows: 80px auto 1fr;
 }
 
 video {
     width: 100%;
-    height: 50vh;
+    height: 40vh;
     aspect-ratio: 4 / 3;
     object-fit: cover;
     border-radius: 20px;
@@ -20,18 +20,6 @@ video {
 
 .video-wrapper {
     margin: 0 20px;
-    position: relative;
-
-    .overlay {
-        position: absolute;
-        height: 80%;
-        width: 80%;
-        top: 10%;
-        left: 10%;
-        border: 4px solid white;
-        border-radius: 20px;
-        display: none;
-    }
 }
 
 div.header {
@@ -43,4 +31,16 @@ div.header {
     p {
         grid-column: 2/3;
     }
+}
+
+button {
+    margin-bottom: 16px;
+}
+
+.actions-wrapper {
+    padding: 20px;
+}
+
+canvas {
+    display: none;
 }

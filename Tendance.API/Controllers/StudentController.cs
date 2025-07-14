@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tendance.API.Authentication;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Student;
 using Tendance.API.Entities;
@@ -11,56 +13,58 @@ using Tendance.API.Services;
 namespace Tendance.API.Controllers
 {
     [Route("api/students")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme},{DeviceAuthDefaults.AuthenticationScheme}")]
     [ApiController]
     public class StudentController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetStudent([FromHeader(Name = "X-Minimal")] bool? minimal)
+        public async Task<IActionResult> GetStudent()
         {
-            IQueryable<Student> students = dbContext.Students
-                .Where(student => student.SchoolId == userContext.SchoolId);
-
-            if (minimal.HasValue && minimal == true)
-            {
-                return Ok(await students.Select(student => new StudentForClientMinimal
+            List<StudentForClient> students = await dbContext.Students
+                .Where(student => student.SchoolId == userContext.SchoolId)
+                .Select(student => new StudentForClient
                 {
-                    Id = student.SchoolAssignedId,
-                    FirstName = student.FirstName,
-                    LastName = student.LastName,
-                    MiddleName = student.MiddleName,
-                })
-                .ToListAsync());
-            }
-            else
-            {
-                return Ok(await students.Select(student => new StudentForClient
-                {
-                    Id = student.SchoolAssignedId,
+                    Id = student.Id,
                     FirstName = student.FirstName,
                     LastName = student.LastName,
                     MiddleName = student.MiddleName,
                     Email = student.Email,
                     Created = student.Created,
-                    AttendanceRate = student.Classrooms.Count == 0 ? 0 : (float)student.Attendances.Count() / (float)student.Classrooms.Count(),
                 })
-                .ToListAsync());
+            .ToListAsync();
+
+            return Ok(students);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetStudentById([FromRoute] int id)
+        {
+            StudentEntity? student = await dbContext.Students
+                .FirstOrDefaultAsync(student => student.SchoolId == userContext.SchoolId && student.Id == id);
+
+            if (student == null)
+            {
+                return NotFound();
             }
+
+            return Ok(new StudentForClient
+            {
+                Id = student.Id,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                MiddleName = student.MiddleName,
+                Email = student.Email,
+                Created = student.Created,
+            });
         }
 
         [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateStudent([FromBody] StudentForCreation studentForCreation)
         {
-            if (await dbContext.Students.AnyAsync(course => course.SchoolId == userContext.SchoolId && course.SchoolAssignedId == studentForCreation.Id.Trim()))
-            {
-                return Conflict("Already exists");
-            }
-
-            Student student = new Student
+            StudentEntity student = new StudentEntity
             {
                 SchoolId = userContext.SchoolId,
-                SchoolAssignedId = studentForCreation.Id.Trim(),
                 Created = DateTime.UtcNow,
                 Email = studentForCreation.Email,
                 FirstName = studentForCreation.FirstName,
@@ -68,24 +72,24 @@ namespace Tendance.API.Controllers
                 MiddleName = studentForCreation.MiddleName
             };
 
-            dbContext.Students.Add(student);
-            dbContext.SaveChanges();
+            await dbContext.Students.AddAsync(student);
+            await dbContext.SaveChangesAsync();
 
             return Ok();
         }
 
         [Authorize(Policy = TendancePolicy.UserOnly)]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteStudent([FromHeader(Name = "X-Student-Id")] string studentId)
+        [HttpDelete("{studentId:int}")]
+        public async Task<IActionResult> DeleteStudent([FromRoute] int studentId)
         {
-            Student? student = await dbContext.Students.FirstOrDefaultAsync(course => course.SchoolAssignedId == studentId && course.SchoolId == userContext.SchoolId);
+            StudentEntity? student = await dbContext.Students.FirstOrDefaultAsync(student => student.Id == studentId && student.SchoolId == userContext.SchoolId);
             if (student != null)
             {
                 dbContext.Students.Remove(student);
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
             }
 
-            return Ok();
+            return NoContent();
         }
     }
 }

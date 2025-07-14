@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../dialog/dialog.component';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
 import { CaptureDevice, CaptureDeviceForCreation, DeviceService } from '../../services/devices/device.service';
-import { ClassroomMinimal, ClassroomService } from '../../services/classroom/classroom.service';
+import { Classroom, ClassroomService } from '../../services/classroom/classroom.service';
 import { NotificationLevel, NotificationService } from '../../services/notification/notification.service';
 
 enum CaptureDevicesModalState {
@@ -19,7 +19,7 @@ class CaptureDeviceModalContext {
 
 class CreateCaptureDeviceForm {
   choice: 'classroom' | 'type' | null = null;
-  classroom: ClassroomMinimal | null = null;
+  classroom: Classroom | null = null;
   nickname: string = '';
   type: string | null = null;
   valid: () => boolean = () => (this.classroom != null);
@@ -42,7 +42,7 @@ export class DevicesComponent {
   private readonly classroomApi = inject(ClassroomService);
   private readonly notificationService = inject(NotificationService);
 
-  classrooms: ClassroomMinimal[] = [];
+  classrooms: Classroom[] = [];
   captureDevices: CaptureDevice[] = [];
 
   deviceTypes: string[] = [];
@@ -61,7 +61,7 @@ export class DevicesComponent {
     this.modalContext.captureDeviceOption = captureDevice;
   }
 
-  selectClassroom(classroom: ClassroomMinimal) {
+  selectClassroom(classroom: Classroom) {
     this.createCaptureDeviceForm.classroom = classroom;
     this.createCaptureDeviceForm.choice = null;
   }
@@ -72,8 +72,8 @@ export class DevicesComponent {
   }
 
   showClassrooms() {
-    this.classroomApi.getAllMinimal().subscribe({
-      next: (classrooms: ClassroomMinimal[]) => {
+    this.classroomApi.get().subscribe({
+      next: (classrooms: Classroom[]) => {
         this.classrooms = classrooms;
         this.createCaptureDeviceForm.choice = 'classroom';
       },
@@ -116,7 +116,7 @@ export class DevicesComponent {
   }
 
   fetchCaptureDevices(): void {
-    this.api.getAll().subscribe({
+    this.api.get().subscribe({
       next: (captureDevice: CaptureDevice[]) => {
         this.captureDevices = captureDevice;
       },

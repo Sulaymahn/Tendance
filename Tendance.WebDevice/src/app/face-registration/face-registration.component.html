@@ -1,9 +1,46 @@
 <div class="wrapper">
   <div class="header">
-    <p>Face Registration</p>
+    <p>Face</p>
   </div>
   <div class="video-wrapper">
     <video #video autoplay></video>
     <div class="overlay"></div>
   </div>
+  <div class="actions-wrapper">
+    @if (isBusy) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+    <button mat-icon-button (click)="fetch()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <mat-form-field>
+      <mat-label>Select Student</mat-label>
+      <mat-select [(value)]="selectedStudent">
+        @for (item of students; track $index) {
+        <mat-option [value]="item"
+          >{{ item.firstName }} {{ item.middleName }}
+          {{ item.lastName }}</mat-option
+        >
+        }
+      </mat-select>
+    </mat-form-field>
+    <button
+      mat-flat-button
+      class="widen"
+      (click)="register()"
+      [disabled]="selectedStudent == null"
+    >
+      Register
+    </button>
+    <button mat-flat-button class="widen" (click)="match()">Match</button>
+    @if(matchedStudent){
+    <p>
+      matched: {{ matchedStudent.firstName }}
+      {{ matchedStudent.middleName }}
+      {{ matchedStudent.lastName }}
+    </p>
+    }
+  </div>
 </div>
+
+<canvas #frameCanvas></canvas>

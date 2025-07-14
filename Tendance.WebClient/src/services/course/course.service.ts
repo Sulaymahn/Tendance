@@ -10,11 +10,6 @@ export interface Course {
   created: Date;
 }
 
-export interface CourseMinimal {
-  id: number;
-  name: string;
-}
-
 export interface CourseForCreation {
   name: string;
   description: string | null;
@@ -26,16 +21,8 @@ export interface CourseForCreation {
 export class CourseService {
   private readonly http = inject(HttpClient);
 
-  getAll(): Observable<Course[]> {
+  get(): Observable<Course[]> {
     return this.http.get<Course[]>(`${environment.backendBaseUrl}courses`);
-  }
-
-  getAllMinimal(): Observable<CourseMinimal[]> {
-    return this.http.get<CourseMinimal[]>(`${environment.backendBaseUrl}courses`, {
-      headers: {
-        'X-Minimal': "true"
-      }
-    });
   }
 
   create(course: CourseForCreation): Observable<void> {
@@ -43,10 +30,6 @@ export class CourseService {
   }
 
   delete(course: Course): Observable<void> {
-    return this.http.delete<void>(`${environment.backendBaseUrl}courses`, {
-      headers: {
-        'X-Course-Id': course.id.toString()
-      }
-    });
+    return this.http.delete<void>(`${environment.backendBaseUrl}courses/${course.id}`);
   }
 }

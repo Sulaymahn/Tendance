@@ -60,7 +60,7 @@ export class RoomsComponent implements OnInit {
   }
 
   fetchRooms(): void {
-    this.api.getAll().subscribe({
+    this.api.get().subscribe({
       next: (rooms: Room[]) => {
         this.rooms = rooms;
       },

@@ -4,19 +4,10 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 export interface CaptureDevice {
-  id: string;
+  id: number;
   classroomId: number;
   nickname: string;
   clientKey: string;
-  type: string;
-  mode: string;
-  created: string;
-}
-
-export interface CaptureDeviceMinimal {
-  id: string;
-  classroomId: number;
-  nickname: string;
   type: string;
   mode: string;
   created: string;
@@ -34,16 +25,8 @@ export interface CaptureDeviceForCreation {
 export class DeviceService {
   private readonly http = inject(HttpClient);
 
-  getAll(): Observable<CaptureDevice[]> {
+  get(): Observable<CaptureDevice[]> {
     return this.http.get<CaptureDevice[]>(`${environment.backendBaseUrl}devices`);
-  }
-
-  getAllMinimal(): Observable<CaptureDeviceMinimal[]> {
-    return this.http.get<CaptureDeviceMinimal[]>(`${environment.backendBaseUrl}devices`, {
-      headers: {
-        'X-Minimal': 'true'
-      }
-    });
   }
 
   getCaptureDeviceTypes(): Observable<string[]> {
@@ -55,10 +38,6 @@ export class DeviceService {
   }
 
   delete(captureDevice: CaptureDevice): Observable<void> {
-    return this.http.delete<void>(`${environment.backendBaseUrl}devices`, {
-      headers: {
-        'X-Device-Id': captureDevice.id
-      }
-    });
+    return this.http.delete<void>(`${environment.backendBaseUrl}devices/${captureDevice.id}`);
   }
 }

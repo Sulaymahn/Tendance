@@ -1,0 +1,150 @@
+<div class="wrapper">
+  <div class="main-actions">
+    <button class="icon" (click)="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <polygon points="24 24 0 12 24 0 24 24" />
+      </svg>
+      Back to sessions
+    </button>
+
+    <button class="icon" (click)="manageEnrollment()">
+      Manage Student Enrollment
+    </button>
+  </div>
+  @if (classroom) {
+  <div class="info">
+    <p>Course: {{ classroom.course.name }}</p>
+    <p>
+      Teacher: {{ classroom.teacher.firstName }}
+      {{ classroom.teacher.middleName }}
+      {{ classroom.teacher.lastName }}
+    </p>
+    <p>
+      Room: {{ classroom.room.name }}
+      {{ classroom.room.building }}
+    </p>
+  </div>
+
+  <h2>Students</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>Last Name</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (student of classroom.students; track $index) {
+      <tr>
+        <td>
+          {{ student.firstName }}
+        </td>
+        <td>
+          {{ student.middleName }}
+        </td>
+        <td>
+          {{ student.lastName }}
+        </td>
+        <td>
+          <button class="icon" title="options" (click)="optionClick(student)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.44 4.11">
+              <rect width="4.11" height="4.11" />
+              <rect x="6.17" width="4.11" height="4.11" />
+              <rect x="12.33" width="4.11" height="4.11" />
+            </svg>
+          </button>
+
+          @if(modalContext.studentOption?.id == student.id){
+          <div
+            class="option-dropdown"
+            appClickOutside
+            (clickOutside)="closeOption()"
+          >
+            <button (click)="viewDetails(classroom)">View Details</button>
+            <button class="danger" (click)="deleteClassroom(classroom)">
+              Delete
+            </button>
+          </div>
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+  }
+</div>
+
+@if(modalState == modalStates.AddStudent){
+<app-dialog (dismissed)="closeModal()">
+  <div class="dialog">
+    <div class="dialog-header">
+      <button (click)="closeModal()" class="icon close" title="close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.17 10.17">
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(-2.11 5.09) rotate(-45)"
+          />
+          <rect
+            class="cls-1"
+            x="-0.05"
+            y="3.03"
+            width="10.28"
+            height="4.11"
+            transform="translate(5.09 -2.11) rotate(45)"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <p class="dialog-title">Students</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of students; track $index) {
+          <tr (click)="selectedStudent(student)">
+            <td>
+              @if (isSelected(student)) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                  class="cls-1"
+                  d="M12,0A12,12,0,1,0,24,12,12,12,0,0,0,12,0ZM10,17.85l-4-4,2-2,2,2,6-6,2,2Z"
+                />
+              </svg>
+              }@else {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                  class="cls-1"
+                  d="M12,3a9,9,0,1,1-9,9,9,9,0,0,1,9-9m0-3A12,12,0,1,0,24,12,12,12,0,0,0,12,0Z"
+                />
+              </svg>
+              }
+            </td>
+            <td>
+              {{ student.firstName }} {{ student.middleName }}
+              {{ student.lastName }}
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dialog-actions">
+      <button class="primary" (click)="updateStudents()">Confirm</button>
+    </div>
+  </div>
+</app-dialog>
+}

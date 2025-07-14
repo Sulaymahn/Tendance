@@ -4,10 +4,11 @@ import { DatePipe } from '@angular/common';
 import { ClickOutsideDirective } from '../../directives/ClickOutside/click-outside.directive';
 import { DialogComponent } from '../dialog/dialog.component';
 import { Classroom, ClassroomForCreation, ClassroomService } from '../../services/classroom/classroom.service';
-import { TeacherMinimal, TeacherService } from '../../services/teacher/teacher.service';
+import { Teacher, TeacherService } from '../../services/teacher/teacher.service';
 import { StudentService } from '../../services/student/student.service';
-import { RoomMinimal, RoomService } from '../../services/room/room.service';
-import { CourseMinimal, CourseService } from '../../services/course/course.service';
+import { Room, RoomService } from '../../services/room/room.service';
+import { Course, CourseService } from '../../services/course/course.service';
+import { Router } from '@angular/router';
 
 
 enum ClassroomModalState {
@@ -22,9 +23,9 @@ class ClassroomModalContext {
 
 class CreateClassroomForm {
   choice: 'course' | 'teacher' | 'room' | null = null;
-  course: CourseMinimal | null = null;
-  teacher: TeacherMinimal | null = null;
-  room: RoomMinimal | null = null;
+  course: Course | null = null;
+  teacher: Teacher | null = null;
+  room: Room | null = null;
   valid: () => boolean = () => (this.course != null && this.teacher != null && this.room != null);
   invalid: () => boolean = () => !this.valid();
   reset: () => void = () => {
@@ -41,6 +42,7 @@ class CreateClassroomForm {
   styleUrl: './classrooms.component.scss'
 })
 export class ClassroomsComponent {
+  private readonly router = inject(Router);
   private readonly api = inject(ClassroomService);
   private readonly teacherApi = inject(TeacherService);
   private readonly studentApi = inject(StudentService);
@@ -49,9 +51,9 @@ export class ClassroomsComponent {
 
   classrooms: Classroom[] = [];
 
-  courses: CourseMinimal[] = [];
-  teachers: TeacherMinimal[] = [];
-  rooms: RoomMinimal[] = [];
+  courses: Course[] = [];
+  teachers: Teacher[] = [];
+  rooms: Room[] = [];
 
   modalState: ClassroomModalState = ClassroomModalState.None;
   modalStates = ClassroomModalState;
@@ -63,27 +65,31 @@ export class ClassroomsComponent {
     this.fetchClassrooms();
   }
 
+  viewDetails(classroom: Classroom) {
+    this.router.navigate(['classrooms', classroom.id.toString()]);
+  }
+
   optionClick(classroom: Classroom) {
     this.modalContext.classroomOption = classroom;
   }
 
-  selectRoom(room: RoomMinimal) {
+  selectRoom(room: Room) {
     this.createClassroomForm.room = room;
     this.createClassroomForm.choice = null;
   }
 
-  selectCourse(course: CourseMinimal) {
+  selectCourse(course: Course) {
     this.createClassroomForm.course = course;
     this.createClassroomForm.choice = null;
   }
-  selectTeacher(teacher: TeacherMinimal) {
+  selectTeacher(teacher: Teacher) {
     this.createClassroomForm.teacher = teacher;
     this.createClassroomForm.choice = null;
   }
 
   showRooms() {
-    this.roomApi.getAllMinimal().subscribe({
-      next: (rooms: RoomMinimal[]) => {
+    this.roomApi.get().subscribe({
+      next: (rooms: Room[]) => {
         this.rooms = rooms;
         this.createClassroomForm.choice = 'room';
       },
@@ -94,8 +100,8 @@ export class ClassroomsComponent {
   }
 
   showTeachers() {
-    this.teacherApi.getAllMinimal().subscribe({
-      next: (teachers: TeacherMinimal[]) => {
+    this.teacherApi.get().subscribe({
+      next: (teachers: Teacher[]) => {
         this.teachers = teachers;
         this.createClassroomForm.choice = 'teacher';
       },
@@ -106,8 +112,8 @@ export class ClassroomsComponent {
   }
 
   showCourses() {
-    this.courseApi.getAll().subscribe({
-      next: (courses: CourseMinimal[]) => {
+    this.courseApi.get().subscribe({
+      next: (courses: Course[]) => {
         this.courses = courses;
         this.createClassroomForm.choice = 'course';
       },
@@ -131,7 +137,7 @@ export class ClassroomsComponent {
   }
 
   fetchClassrooms(): void {
-    this.api.getAll().subscribe({
+    this.api.get().subscribe({
       next: (classrooms: Classroom[]) => {
         this.classrooms = classrooms;
       },

@@ -4,33 +4,33 @@ using Tendance.API.Entities;
 
 namespace Tendance.API.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(IConfiguration configuration) : DbContext
     {
-        public DbSet<User> Users => Set<User>();
-        public DbSet<Room> Rooms => Set<Room>();
-        public DbSet<School> Schools => Set<School>();
-        public DbSet<Course> Courses => Set<Course>();
-        public DbSet<Teacher> Teachers => Set<Teacher>();
-        public DbSet<Student> Students => Set<Student>();
-        public DbSet<Classroom> Classrooms => Set<Classroom>();
-        public DbSet<CaptureDevice> Devices => Set<CaptureDevice>();
-        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<UserEntity> Users => Set<UserEntity>();
+        public DbSet<RoomEntity> Rooms => Set<RoomEntity>();
+        public DbSet<SchoolEntity> Schools => Set<SchoolEntity>();
+        public DbSet<CourseEntity> Courses => Set<CourseEntity>();
+        public DbSet<TeacherEntity> Teachers => Set<TeacherEntity>();
+        public DbSet<StudentEntity> Students => Set<StudentEntity>();
+        public DbSet<ClassroomEntity> Classrooms => Set<ClassroomEntity>();
+        public DbSet<CaptureDeviceEntity> Devices => Set<CaptureDeviceEntity>();
+        public DbSet<RefreshTokenEntity> RefreshTokens => Set<RefreshTokenEntity>();
 
-        public DbSet<CourseTeacher> CourseTeachers => Set<CourseTeacher>();
-        public DbSet<ClassroomStudent> ClassroomStudents => Set<ClassroomStudent>();
-        public DbSet<ClassroomSession> ClassroomSessions => Set<ClassroomSession>();
+        public DbSet<CourseTeacherEntity> CourseTeachers => Set<CourseTeacherEntity>();
+        public DbSet<ClassroomStudentEntity> ClassroomStudents => Set<ClassroomStudentEntity>();
+        public DbSet<ClassroomSessionEntity> ClassroomSessions => Set<ClassroomSessionEntity>();
 
-        public DbSet<Attendance> Attendances => Set<Attendance>();
-        public DbSet<StudentAttendance> StudentAttendances => Set<StudentAttendance>();
-        public DbSet<TeacherAttendance> TeacherAttendances => Set<TeacherAttendance>();
+        public DbSet<AttendanceEntity> Attendances => Set<AttendanceEntity>();
+        public DbSet<StudentAttendanceEntity> StudentAttendances => Set<StudentAttendanceEntity>();
+        public DbSet<TeacherAttendanceEntity> TeacherAttendances => Set<TeacherAttendanceEntity>();
 
-        public DbSet<Face> Faces => Set<Face>();
-        public DbSet<StudentFace> StudentFaces => Set<StudentFace>();
-        public DbSet<TeacherFace> TeacherFaces => Set<TeacherFace>();
+        public DbSet<FaceEntity> Faces => Set<FaceEntity>();
+        public DbSet<StudentFaceEntity> StudentFaces => Set<StudentFaceEntity>();
+        public DbSet<TeacherFaceEntity> TeacherFaces => Set<TeacherFaceEntity>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string? connectionString = Environment.GetEnvironmentVariable("TENDANCE_DB_CONNECTION");
+            string? connectionString = configuration["TENDANCE_DB_CONNECTION"];
             ArgumentNullException.ThrowIfNullOrEmpty(connectionString);
             optionsBuilder.UseSqlServer(connectionString);
             optionsBuilder.EnableSensitiveDataLogging();
@@ -41,40 +41,23 @@ namespace Tendance.API.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            modelBuilder.Entity<Attendance>()
-                .HasDiscriminator<string>("Role")
-                .HasValue<StudentAttendance>("Student")
-                .HasValue<TeacherAttendance>("Teacher");
-
-            modelBuilder.Entity<StudentAttendance>()
-                .HasOne(ta => ta.Student)
-                .WithMany()
-                .HasForeignKey(t => t.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<TeacherAttendance>()
-                .HasOne(ta => ta.Teacher)
-                .WithMany()
-                .HasForeignKey(t => t.TeacherId)
-                .OnDelete(DeleteBehavior.ClientCascade);
-
-            modelBuilder.Entity<Teacher>()
+            modelBuilder.Entity<TeacherEntity>()
                 .HasMany(t => t.Courses)
                 .WithMany(c => c.Teachers)
-                .UsingEntity<CourseTeacher>();
+                .UsingEntity<CourseTeacherEntity>();
 
-            modelBuilder.Entity<Face>()
+            modelBuilder.Entity<FaceEntity>()
                 .HasDiscriminator<string>("Type")
-                .HasValue<StudentFace>("Student")
-                .HasValue<TeacherFace>("Teacher");
+                .HasValue<StudentFaceEntity>("Student")
+                .HasValue<TeacherFaceEntity>("Teacher");
 
-            modelBuilder.Entity<StudentFace>()
+            modelBuilder.Entity<StudentFaceEntity>()
                 .HasOne(face => face.Student)
                 .WithMany()
                 .HasForeignKey(s => s.StudentId)
                 .OnDelete(DeleteBehavior.ClientCascade);
 
-            modelBuilder.Entity<TeacherFace>()
+            modelBuilder.Entity<TeacherFaceEntity>()
                 .HasOne(face => face.Teacher)
                 .WithMany()
                 .HasForeignKey(s => s.TeacherId)
@@ -85,7 +68,7 @@ namespace Tendance.API.Data
                 time: new TimeOnly(),
                 kind: DateTimeKind.Utc);
 
-            School school = new School
+            SchoolEntity school = new SchoolEntity
             {
                 Id = new Guid("227A8BD2-A317-4891-A885-2623819F6642"),
                 Email = "tendance@iqacademy.com",
@@ -93,7 +76,7 @@ namespace Tendance.API.Data
                 Joined = date
             };
 
-            User user = new User
+            UserEntity user = new UserEntity
             {
                 Id = new Guid("1AC38D88-6806-4773-83F8-E59EC675CC25"),
                 SchoolId = school.Id,
@@ -103,7 +86,7 @@ namespace Tendance.API.Data
                 Created = date
             };
 
-            Teacher teacher = new Teacher
+            TeacherEntity teacher = new TeacherEntity
             {
                 Id = 1,
                 SchoolId = school.Id,
@@ -113,11 +96,10 @@ namespace Tendance.API.Data
                 LastName = "Solomon",
             };
 
-            Student student = new Student
+            StudentEntity student = new StudentEntity
             {
                 Id = 1,
                 SchoolId = school.Id,
-                SchoolAssignedId = "DUT-15001",
                 Created = date,
                 Email = "eeshan@gmail.com",
                 FirstName = "Aisha",
@@ -125,7 +107,7 @@ namespace Tendance.API.Data
                 LastName = "Usman",
             };
 
-            Course course = new Course
+            CourseEntity course = new CourseEntity
             {
                 Id = 1,
                 SchoolId = school.Id,
@@ -133,14 +115,14 @@ namespace Tendance.API.Data
                 Name = "Control Systems",
             };
 
-            Room room = new Room
+            RoomEntity room = new RoomEntity
             {
                 Id = 1,
                 SchoolId = school.Id,
                 Name = "Remote",
             };
 
-            Classroom classroom = new Classroom
+            ClassroomEntity classroom = new ClassroomEntity
             {
                 Id = 1,
                 SchoolId = school.Id,
@@ -150,9 +132,9 @@ namespace Tendance.API.Data
                 TeacherId = teacher.Id,
             };
 
-            CaptureDevice device = new CaptureDevice
+            CaptureDeviceEntity device = new CaptureDeviceEntity
             {
-                Id = new Guid("41054BC3-E078-4BC6-A5FE-DAF6985C51D4"),
+                Id = 1,
                 SchoolId = school.Id,
                 ClassroomId = classroom.Id,
                 ClientKey = $"dev-FBB630A0-72CE-43D5-B364-2534BE0137E5",
@@ -162,14 +144,14 @@ namespace Tendance.API.Data
                 Nickname = "Default",
             };
 
-            modelBuilder.Entity<Room>().HasData(room);
-            modelBuilder.Entity<User>().HasData(user);
-            modelBuilder.Entity<School>().HasData(school);
-            modelBuilder.Entity<Student>().HasData(student);
-            modelBuilder.Entity<Teacher>().HasData(teacher);
-            modelBuilder.Entity<Course>().HasData(course);
-            modelBuilder.Entity<Classroom>().HasData(classroom);
-            modelBuilder.Entity<CaptureDevice>().HasData(device);
+            modelBuilder.Entity<RoomEntity>().HasData(room);
+            modelBuilder.Entity<UserEntity>().HasData(user);
+            modelBuilder.Entity<SchoolEntity>().HasData(school);
+            modelBuilder.Entity<StudentEntity>().HasData(student);
+            modelBuilder.Entity<TeacherEntity>().HasData(teacher);
+            modelBuilder.Entity<CourseEntity>().HasData(course);
+            modelBuilder.Entity<ClassroomEntity>().HasData(classroom);
+            modelBuilder.Entity<CaptureDeviceEntity>().HasData(device);
         }
     }
 }

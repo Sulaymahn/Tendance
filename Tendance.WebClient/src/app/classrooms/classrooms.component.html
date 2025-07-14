@@ -46,7 +46,7 @@
             appClickOutside
             (clickOutside)="closeOption()"
           >
-            <button>Edit</button>
+            <button (click)="viewDetails(classroom)">View Details</button>
             <button class="danger" (click)="deleteClassroom(classroom)">
               Delete
             </button>

@@ -48,7 +48,7 @@ namespace Tendance.API
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtSetting.Issuer,
                     ValidAudience = jwtSetting.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("TENDANCE_API_AUTH_TOKEN_KEY") ?? throw new ArgumentException("TOKEN KEY NOT FOUND"))),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TENDANCE_API_AUTH_TOKEN_KEY"] ?? throw new ArgumentException("TOKEN KEY NOT FOUND"))),
                     ClockSkew = TimeSpan.Zero
                 };
             }).AddTendanceDevice();
@@ -82,9 +82,12 @@ namespace Tendance.API
 
             var app = builder.Build();
 
-            //app.UseHttpsRedirection();
+#if !DEBUG
+            app.UseHttpsRedirection();
+#endif
             app.UseCors();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

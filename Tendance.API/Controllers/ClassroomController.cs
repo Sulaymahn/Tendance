@@ -1,69 +1,32 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tendance.API.Authentication;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Classroom;
-using Tendance.API.DataTransferObjects.Course;
-using Tendance.API.DataTransferObjects.Room;
 using Tendance.API.DataTransferObjects.Student;
-using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
 using Tendance.API.Models;
 using Tendance.API.Services;
-using ClassroomStudent = Tendance.API.DataTransferObjects.Classroom.ClassroomStudent;
 
 namespace Tendance.API.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme},{DeviceAuthDefaults.AuthenticationScheme}")]
     [Route("api/classrooms")]
     [ApiController]
     public class ClassroomController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetClassrooms([FromHeader(Name = "X-Minimal")] bool? minimal)
+        public async Task<IActionResult> GetClassrooms()
         {
-            IQueryable<Classroom> classrooms = dbContext.Classrooms
+            List<ClassroomForClient> classrooms = await dbContext.Classrooms
                 .Include(c => c.Course)
                 .Include(c => c.Teacher)
                 .Include(c => c.Room)
-                .Where(c => c.SchoolId == userContext.SchoolId);
-
-            if (minimal.HasValue && minimal == true)
-            {
-                return Ok(await classrooms.Select(c => new ClassroomForClientMinimal
-                {
-                    Id = c.Id,
-                    Course = new CourseForClientMinimal
-                    {
-                        Id = c.Course!.Id,
-                        Name = c.Course.Name,
-                    },
-                    Room = new RoomForClientMinimal
-                    {
-                        Id = c.Room!.Id,
-                        Name = c.Room.Name,
-                        Building = c.Room.Building,
-                    },
-                    Teacher = new TeacherForClientMinimal
-                    {
-                        Id = c.Teacher!.Id,
-                        FirstName = c.Teacher.FirstName,
-                        LastName = c.Teacher.LastName,
-                        MiddleName = c.Teacher.MiddleName,
-                    },
-                    Students = c.Students.Select(student => new StudentForClientMinimal
-                    {
-                        Id = student.SchoolAssignedId,
-                        FirstName = student.FirstName,
-                        LastName = student.LastName,
-                        MiddleName = student.MiddleName,
-                    })
-                })
-                .ToListAsync());
-            }
-            else
-            {
-                return Ok(await classrooms.Select(c => new ClassroomForClient
+                .Where(c => c.SchoolId == userContext.SchoolId)
+                .Select(c => new ClassroomForClient
                 {
                     Id = c.Id,
                     Created = c.Created,
@@ -72,7 +35,7 @@ namespace Tendance.API.Controllers
                         Id = c.Course!.Id,
                         Name = c.Course.Name,
                     },
-                    Room = new RoomForClient
+                    Room = new ClassroomRoom
                     {
                         Id = c.Room!.Id,
                         Name = c.Room.Name,
@@ -87,14 +50,171 @@ namespace Tendance.API.Controllers
                     },
                     Students = c.Students.Select(student => new ClassroomStudent
                     {
-                        Id = student.SchoolAssignedId,
+                        Id = student.Id,
                         FirstName = student.FirstName,
                         LastName = student.LastName,
                         MiddleName = student.MiddleName,
                     })
                 })
-                .ToListAsync());
+            .ToListAsync();
+
+            return Ok(classrooms);
+        }
+
+        [HttpGet("{classroomId:int}")]
+        public async Task<IActionResult> GetClassroomById([FromRoute] int classroomId)
+        {
+            ClassroomForClient? classroom = await dbContext.Classrooms
+                .Include(c => c.Course)
+                .Include(c => c.Teacher)
+                .Include(c => c.Room)
+                .Include(c => c.Students)
+                .Where(c => c.SchoolId == userContext.SchoolId && c.Id == classroomId)
+                .Select(c => new ClassroomForClient
+                {
+                    Id = c.Id,
+                    Created = c.Created,
+                    Course = new ClassroomCourse
+                    {
+                        Id = c.Course!.Id,
+                        Name = c.Course.Name,
+                    },
+                    Room = new ClassroomRoom
+                    {
+                        Id = c.Room!.Id,
+                        Name = c.Room.Name,
+                        Building = c.Room.Building,
+                    },
+                    Teacher = new ClassroomTeacher
+                    {
+                        Id = c.Teacher!.Id,
+                        FirstName = c.Teacher.FirstName,
+                        LastName = c.Teacher.LastName,
+                        MiddleName = c.Teacher.MiddleName,
+                    },
+                    Students = c.Students.Select(student => new ClassroomStudent
+                    {
+                        Id = student.Id,
+                        FirstName = student.FirstName,
+                        LastName = student.LastName,
+                        MiddleName = student.MiddleName,
+                    })
+                })
+            .FirstOrDefaultAsync();
+
+            if (classroom == null)
+            {
+                return NotFound();
             }
+
+            return Ok(classroom);
+        }
+
+        [HttpGet("{classroomId:int}/students")]
+        public async Task<IActionResult> GetClassroomStudents([FromRoute] int classroomId)
+        {
+            List<ClassroomStudent> classrooms = await dbContext.Classrooms
+                .Where(c => c.SchoolId == userContext.SchoolId && c.Id == classroomId)
+                .SelectMany(c => c.Students.Select(student => new ClassroomStudent
+                {
+                    Id = student.Id,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    MiddleName = student.MiddleName,
+                }))
+                .ToListAsync();
+
+            return Ok(classrooms);
+        }
+
+        [HttpPost("{classroomId:int}/students")]
+        public async Task<IActionResult> AddClassroomStudents([FromRoute] int classroomId, [FromBody] List<int> studentIds)
+        {
+
+            if (studentIds == null || studentIds.Any())
+            {
+                return BadRequest("No student IDs provided.");
+            }
+
+            var classroomExists = await dbContext.Classrooms.AnyAsync(c => c.Id == classroomId);
+            if (!classroomExists)
+            {
+                return NotFound($"Classroom with ID {classroomId} not found.");
+            }
+
+            var existingStudentClassrooms = await dbContext.ClassroomStudents
+                .Where(sc => sc.ClassroomId == classroomId && studentIds.Contains(sc.StudentId))
+                .Select(sc => sc.StudentId)
+                .ToListAsync();
+
+            var studentIdsToAdd = studentIds
+                .Except(existingStudentClassrooms)
+                .ToList();
+
+            if (!studentIdsToAdd.Any())
+            {
+                return Ok("All provided students are already assigned to this classroom.");
+            }
+
+            var validStudentIds = await dbContext.Students
+                .Where(s => studentIdsToAdd.Contains(s.Id))
+                .Select(s => s.Id)
+                .ToListAsync();
+
+            var invalidStudentIds = studentIdsToAdd.Except(validStudentIds).ToList();
+            if (invalidStudentIds.Any())
+            {
+                return BadRequest($"The following student IDs are invalid or do not exist: {string.Join(", ", invalidStudentIds)}");
+            }
+
+            var newStudentClassrooms = validStudentIds.Select(studentId => new ClassroomStudentEntity
+            {
+                StudentId = studentId,
+                ClassroomId = classroomId,
+            }).ToList();
+
+            await dbContext.ClassroomStudents.AddRangeAsync(newStudentClassrooms);
+
+            await dbContext.SaveChangesAsync();
+
+            return Ok($"Successfully added {newStudentClassrooms.Count} student(s) to classroom {classroomId}.");
+        }
+
+        [HttpPut("{classroomId:int}/students")]
+        public async Task<IActionResult> UpdateClassroomStudents([FromRoute] int classroomId, [FromBody] List<int> studentIds)
+        {
+            var classroomExists = await dbContext.Classrooms.AnyAsync(c => c.Id == classroomId);
+            if (!classroomExists)
+            {
+                return NotFound($"Classroom with ID {classroomId} not found.");
+            }
+
+            await dbContext.ClassroomStudents
+                .Where(sc => sc.ClassroomId == classroomId)
+                .ExecuteDeleteAsync();
+
+            var validStudentIds = await dbContext.Students
+                .Where(s => studentIds.Contains(s.Id))
+                .Select(s => s.Id)
+                .ToListAsync();
+
+            var invalidStudentIds = studentIds.Except(validStudentIds).ToList();
+            if (invalidStudentIds.Any())
+            {
+                return BadRequest($"The following student IDs are invalid or do not exist: {string.Join(", ", invalidStudentIds)}");
+            }
+
+            var newStudentClassrooms = validStudentIds.Select(studentId => new ClassroomStudentEntity
+            {
+                StudentId = studentId,
+                ClassroomId = classroomId,
+            }).ToList();
+
+            await dbContext.ClassroomStudents.AddRangeAsync(newStudentClassrooms);
+
+            await dbContext.SaveChangesAsync();
+
+            return Ok();
         }
 
         [Authorize(Policy = TendancePolicy.UserOnly)]
@@ -119,7 +239,7 @@ namespace Tendance.API.Controllers
                 return BadRequest("Room unavailable");
             }
 
-            var classroom = new Classroom
+            var classroom = new ClassroomEntity
             {
                 Created = DateTime.UtcNow,
                 CourseId = course.Id,
@@ -140,7 +260,7 @@ namespace Tendance.API.Controllers
                     Id = course.Id,
                     Name = course.Name,
                 },
-                Room = new RoomForClient
+                Room = new ClassroomRoom
                 {
                     Id = room.Id,
                     Building = room.Building,
@@ -159,15 +279,16 @@ namespace Tendance.API.Controllers
         }
 
         [Authorize(Policy = TendancePolicy.UserOnly)]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteClassroom([FromHeader(Name = "X-Classroom-Id")] int id)
+        [HttpDelete("{classroomId:int}")]
+        public async Task<IActionResult> DeleteClassroom([FromRoute] int classroomId)
         {
-            var schoolId = userContext.SchoolId;
             var classroom = await dbContext.Classrooms
-                .FirstOrDefaultAsync(c => c.SchoolId == schoolId && c.Id == id);
+                .FirstOrDefaultAsync(c => c.SchoolId == userContext.SchoolId && c.Id == classroomId);
 
             if (classroom == null)
+            {
                 return NotFound();
+            }
 
             dbContext.Classrooms.Remove(classroom);
             await dbContext.SaveChangesAsync();

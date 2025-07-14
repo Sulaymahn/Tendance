@@ -9,15 +9,7 @@ export interface Teacher {
   middleName: string | null;
   lastName: string;
   email: string;
-  attendanceRate: number;
   created: string;
-}
-
-export interface TeacherMinimal {
-  id: number;
-  firstName: string;
-  middleName: string | null;
-  lastName: string;
 }
 
 export class TeacherForCreation {
@@ -33,16 +25,8 @@ export class TeacherForCreation {
 export class TeacherService {
   private readonly http = inject(HttpClient);
 
-  getAll(): Observable<Teacher[]> {
+  get(): Observable<Teacher[]> {
     return this.http.get<Teacher[]>(`${environment.backendBaseUrl}teachers`);
-  }
-
-  getAllMinimal(): Observable<TeacherMinimal[]> {
-    return this.http.get<Teacher[]>(`${environment.backendBaseUrl}teachers`, {
-      headers: {
-        'X-Minimal': "true"
-      }
-    });
   }
 
   create(teacher: TeacherForCreation): Observable<void> {

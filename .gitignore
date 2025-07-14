@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Tendance.API/Migrations
 /Tendance.API/MLModels
+/Tendance.API/Certificates

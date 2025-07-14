@@ -23,11 +23,11 @@ namespace Tendance.API.Authentication
                 return AuthenticateResult.Fail("Missing Authorization Header");
 
             string header = value.ToString();
-            if (!header.StartsWith("Device ")) return AuthenticateResult.Fail("Invalid scheme");
+            if (!header.StartsWith($"{DeviceAuthDefaults.AuthenticationScheme} ")) return AuthenticateResult.Fail("Invalid scheme");
 
-            string clientKey = header["Device ".Length..];
+            string clientKey = header[$"{DeviceAuthDefaults.AuthenticationScheme} ".Length..];
 
-            CaptureDevice? device = await dbContext.Devices
+            CaptureDeviceEntity? device = await dbContext.Devices
                 .AsNoTracking()
                 .FirstOrDefaultAsync(device => device.ClientKey == clientKey);
 
@@ -40,7 +40,7 @@ namespace Tendance.API.Authentication
                 new(TendanceClaim.DeviceType, device.Type.ToString()),
             };
 
-            Request.HttpContext.Items["device"] = device;
+            Request.HttpContext.Items[DeviceAuthDefaults.ContextKey] = device;
 
             var identity = new ClaimsIdentity(claims, nameof(DeviceAuthenticationHandler));
             var principal = new ClaimsPrincipal(identity);

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tendance.API.Authentication;
 using Tendance.API.Data;
 using Tendance.API.Entities;
 using Tendance.API.Models;
@@ -8,18 +10,15 @@ using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
 {
-    [Authorize(Policy = TendancePolicy.DeviceOnly)]
+    [Authorize(AuthenticationSchemes = DeviceAuthDefaults.AuthenticationScheme, Policy = TendancePolicy.DeviceOnly)]
     [Route("api/capture")]
     [ApiController]
     public class CaptureController(ApplicationDbContext dbContext, FacialRecognitionService facialRecognitionService) : ControllerBase
     {
         [HttpPost]
-        public async Task<IActionResult> CaptureAsync(
-            [FromHeader(Name = "X-Client-Key")] string clientKey,
-            [FromForm(Name = "file")] IFormFile file)
+        public async Task<IActionResult> MatchAsync([FromForm(Name = "file")] IFormFile file)
         {
-            CaptureDevice? device = await dbContext.Devices.FirstOrDefaultAsync(device => device.ClientKey == clientKey);
-            if (device == null)
+            if (Request.HttpContext.Items[DeviceAuthDefaults.ContextKey] is not CaptureDeviceEntity device)
             {
                 return BadRequest("Unknown Device");
             }
@@ -35,7 +34,7 @@ namespace Tendance.API.Controllers
 
             var now = DateTime.UtcNow;
 
-            ClassroomSession? session = await dbContext.ClassroomSessions
+            ClassroomSessionEntity? session = await dbContext.ClassroomSessions
                 .AsNoTracking()
                 .Where(session => session.ClassroomId == device.ClassroomId && ((session.CheckInFrom < now && session.CheckInTo > now) || (session.CheckOutFrom < now && session.CheckOutTo > now)))
                 .OrderByDescending(session => session.To)
@@ -53,15 +52,17 @@ namespace Tendance.API.Controllers
                 _ => throw new ArgumentException("Unrecognized capture device type")
             };
 
-            if (!result.Success || !isCheckIn.HasValue)
+            if (!result.Success || !isCheckIn.HasValue || session == null)
             {
                 return Ok(result);
             }
 
             if (result.Role == AttendanceRole.Student)
             {
-                await dbContext.StudentAttendances.AddAsync(new StudentAttendance
+                await dbContext.StudentAttendances.AddAsync(new StudentAttendanceEntity
                 {
+                    SchoolId = device.SchoolId,
+                    ClassroomSessionId = session!.Id,
                     StudentId = result.MatchId!.Value,
                     Timestamp = DateTime.UtcNow,
                     Type = isCheckIn.Value ? AttendanceType.CheckIn : AttendanceType.CheckOut,
@@ -70,8 +71,10 @@ namespace Tendance.API.Controllers
             }
             else if (result.Role == AttendanceRole.Teacher)
             {
-                await dbContext.TeacherAttendances.AddAsync(new TeacherAttendance
+                await dbContext.TeacherAttendances.AddAsync(new TeacherAttendanceEntity
                 {
+                    SchoolId = device.SchoolId,
+                    ClassroomSessionId = session!.Id,
                     TeacherId = result.MatchId!.Value,
                     Timestamp = DateTime.UtcNow,
                     Type = isCheckIn.Value ? AttendanceType.CheckIn : AttendanceType.CheckOut,
@@ -84,21 +87,19 @@ namespace Tendance.API.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(
-            [FromHeader(Name = "X-Client-Key")] string clientKey,
-            [FromHeader(Name = "X-Capture-Role")] AttendanceRole role,
-            [FromHeader(Name = "X-Capture-Owner-Id")] string ownerId,
-            [FromForm(Name = "file")] IFormFile file)
+            [FromForm(Name = "UserRole")] AttendanceRole role,
+            [FromForm(Name = "UserId")] int userId,
+            [FromForm(Name = "File")] IFormFile file)
         {
-            CaptureDevice? device = await dbContext.Devices.FirstOrDefaultAsync(device => device.ClientKey == clientKey);
-            if (device == null)
+            if (Request.HttpContext.Items[DeviceAuthDefaults.ContextKey] is not CaptureDeviceEntity device)
             {
                 return BadRequest("Unknown Device");
             }
 
             object? person = role switch
             {
-                AttendanceRole.Student => await dbContext.Students.FirstOrDefaultAsync(student => student.SchoolAssignedId == ownerId && student.SchoolId == device.SchoolId),
-                AttendanceRole.Teacher => await dbContext.Teachers.FirstOrDefaultAsync(teacher => teacher.Id == int.Parse(ownerId) && teacher.SchoolId == device.SchoolId),
+                AttendanceRole.Student => await dbContext.Students.FirstOrDefaultAsync(student => student.Id == userId && student.SchoolId == device.SchoolId),
+                AttendanceRole.Teacher => await dbContext.Teachers.FirstOrDefaultAsync(teacher => teacher.Id == userId && teacher.SchoolId == device.SchoolId),
                 _ => throw new ArgumentException("Unknown role")
             };
 

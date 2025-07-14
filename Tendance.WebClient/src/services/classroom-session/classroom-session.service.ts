@@ -2,11 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
-import { ClassroomMinimal } from '../classroom/classroom.service';
+import { Classroom } from '../classroom/classroom.service';
 
 export interface ClassroomSession {
   id: string;
-  classroom: ClassroomMinimal;
+  classroom: Classroom;
   topic: string | null;
   from: string;
   to: string;
@@ -16,6 +16,19 @@ export interface ClassroomSession {
   checkOutTo: string;
   note: string | null;
   created: string;
+  attendances: ClassroomSessionAttendance[];
+}
+
+export interface ClassroomSessionAttendance {
+  userId: number;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  role: string;
+  checkedIn: boolean;
+  checkedOut: boolean;
+  checkInTimeStamp: string;
+  checkOutTimeStamp: string;
 }
 
 export interface ClassroomSessionForCreation {
@@ -37,8 +50,12 @@ export interface ClassroomSessionForCreation {
 export class ClassroomSessionService {
   private http = inject(HttpClient);
 
-  getAll(): Observable<ClassroomSession[]> {
+  get(): Observable<ClassroomSession[]> {
     return this.http.get<ClassroomSession[]>(`${environment.backendBaseUrl}sessions`);
+  }
+
+  getById(id: number): Observable<ClassroomSession> {
+    return this.http.get<ClassroomSession>(`${environment.backendBaseUrl}sessions/${id}`);
   }
 
   create(session: ClassroomSessionForCreation): Observable<void> {
@@ -46,10 +63,6 @@ export class ClassroomSessionService {
   }
 
   delete(session: ClassroomSession): Observable<void> {
-    return this.http.delete<void>(`${environment.backendBaseUrl}sessions`, {
-      headers: {
-        'X-Classroom-Session-Id': session.id
-      }
-    });
+    return this.http.delete<void>(`${environment.backendBaseUrl}sessions/`);
   }
 }

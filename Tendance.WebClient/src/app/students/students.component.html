@@ -8,18 +8,15 @@
   <table>
     <thead>
       <tr>
-        <th>Id</th>
         <th>Name</th>
         <th>Email</th>
         <th>Created</th>
-        <th class="text-end">Rate</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       @for (student of students; track $index) {
       <tr>
-        <td (click)="selectStudent(student)">{{ student.id }}</td>
         <td (click)="selectStudent(student)">
           {{ student.firstName }} {{ student.middleName }}
           {{ student.lastName }}
@@ -27,9 +24,6 @@
         <td (click)="selectStudent(student)">{{ student.email }}</td>
         <td (click)="selectStudent(student)">
           {{ student.created | date : "medium" }}
-        </td>
-        <td class="text-end" (click)="selectStudent(student)">
-          {{ student.attendanceRate }}%
         </td>
         <td>
           <button class="icon" title="options" (click)="optionClick(student)">
@@ -82,15 +76,6 @@
     </div>
     <p class="dialog-title">Add new student</p>
     <form>
-      <div class="text-field">
-        <label>Student ID*</label>
-        <input
-          title="student id"
-          type="text"
-          placeholder="student ID"
-          [formControl]="createStudentForm.controls.id"
-        />
-      </div>
       <div class="text-field">
         <label>First name*</label>
         <input

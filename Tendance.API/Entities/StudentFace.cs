@@ -1,8 +1,0 @@
-﻿namespace Tendance.API.Entities
-{
-    public class StudentFace : Face
-    {
-        public int StudentId { get; set; }
-        public Student? Student { get; set; }
-    }
-}

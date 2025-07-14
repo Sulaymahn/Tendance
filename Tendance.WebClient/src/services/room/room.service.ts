@@ -9,11 +9,6 @@ export interface Room {
   building: string;
 }
 
-export interface RoomMinimal {
-  id: number;
-  name: string;
-}
-
 export interface RoomForCreation {
   name: string;
   building: string | null;
@@ -25,16 +20,8 @@ export interface RoomForCreation {
 export class RoomService {
   private readonly http = inject(HttpClient);
 
-  getAll(): Observable<Room[]> {
+  get(): Observable<Room[]> {
     return this.http.get<Room[]>(`${environment.backendBaseUrl}rooms`);
-  }
-
-  getAllMinimal(): Observable<RoomMinimal[]> {
-    return this.http.get<RoomMinimal[]>(`${environment.backendBaseUrl}rooms`, {
-      headers: {
-        'X-Minimal': "true"
-      }
-    });
   }
 
   create(room: RoomForCreation): Observable<void> {

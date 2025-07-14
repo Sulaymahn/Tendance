@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tendance.API.Authentication;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Room;
 using Tendance.API.Entities;
@@ -9,42 +11,31 @@ using Tendance.API.Services;
 
 namespace Tendance.API.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme},{DeviceAuthDefaults.AuthenticationScheme}")]
     [Route("api/rooms")]
     [ApiController]
     public class RoomController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomForClient>>> GetRooms([FromHeader(Name = "X-Minimal")] bool? minimal)
+        public async Task<IActionResult> GetRooms()
         {
-            IQueryable<Room> rooms = dbContext.Rooms
-                .Where(r => r.SchoolId == userContext.SchoolId);
+            List<RoomForClient> rooms = await dbContext.Rooms
+                .Where(room => room.SchoolId == userContext.SchoolId)
+                .Select(room => new RoomForClient
+                {
+                    Id = room.Id,
+                    Name = room.Name,
+                    Building = room.Building
+                }).ToListAsync();
 
-            if (minimal.HasValue && minimal == true)
-            {
-                return Ok(await rooms.Select(r => new RoomForClientMinimal
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Building = r.Building
-                }).ToListAsync());
-            }
-            else
-            {
-                return Ok(await rooms.Select(r => new RoomForClient
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Building = r.Building
-                }).ToListAsync());
-            }
+            return Ok(rooms);
         }
 
         [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateRoom([FromBody] RoomForCreation dto)
         {
-            var room = new Room
+            var room = new RoomEntity
             {
                 Name = dto.Name,
                 Building = dto.Building,
@@ -58,15 +49,15 @@ namespace Tendance.API.Controllers
         }
 
         [Authorize(Policy = TendancePolicy.UserOnly)]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteRoom([FromHeader(Name = "X-Room-Id")] int id)
+        [HttpDelete("{roomId:int}")]
+        public async Task<IActionResult> DeleteRoom([FromRoute] int roomId)
         {
-            var schoolId = userContext.SchoolId;
-            var room = await dbContext.Rooms
-                .FirstOrDefaultAsync(r => r.Id == id && r.SchoolId == schoolId);
+            RoomEntity? room = await dbContext.Rooms.FirstOrDefaultAsync(room => room.Id == roomId && room.SchoolId == userContext.SchoolId);
 
             if (room == null)
+            {
                 return NotFound();
+            }
 
             dbContext.Rooms.Remove(room);
             await dbContext.SaveChangesAsync();

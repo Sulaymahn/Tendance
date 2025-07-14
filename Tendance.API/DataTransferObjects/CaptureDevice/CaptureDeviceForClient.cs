@@ -5,7 +5,7 @@ namespace Tendance.API.DataTransferObjects.CaptureDevice
 {
     public class CaptureDeviceForClient
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public int? ClassroomId { get; set; }
         public string Nickname { get; set; } = string.Empty;
         public string ClientKey { get; set; } = string.Empty;

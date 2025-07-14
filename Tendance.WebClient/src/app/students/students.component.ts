@@ -30,9 +30,6 @@ export class StudentsComponent {
   modalContext: StudentModalContext = new StudentModalContext();
 
   createStudentForm = new FormGroup({
-    id: new FormControl('', [
-      Validators.required
-    ]),
     firstName: new FormControl('', [
       Validators.required,
       Validators.minLength(2),
@@ -73,7 +70,7 @@ export class StudentsComponent {
   }
 
   fetchStudents(): void {
-    this.api.getAll().subscribe({
+    this.api.get().subscribe({
       next: (students: Student[]) => {
         this.students = students;
       },
@@ -89,7 +86,6 @@ export class StudentsComponent {
 
   createStudent(): void {
     const studentData: StudentForCreation = {
-      id: this.createStudentForm.value.id || '',
       email: this.createStudentForm.value.email || '',
       firstName: this.createStudentForm.value.firstName || '',
       middleName: this.createStudentForm.value.middleName || '',

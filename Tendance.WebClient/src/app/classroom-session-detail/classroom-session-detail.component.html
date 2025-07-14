@@ -1,0 +1,96 @@
+<div class="wrapper">
+  <button class="icon" (click)="goBack()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <polygon points="24 24 0 12 24 0 24 24" />
+    </svg>
+    Back to sessions
+  </button>
+  @if (session) {
+  <div class="session-info">
+    <p>Course: {{ session.classroom.course.name }}</p>
+    <p>
+      Teacher: {{ session.classroom.teacher.firstName }}
+      {{ session.classroom.teacher.middleName }}
+      {{ session.classroom.teacher.lastName }}
+    </p>
+    <p>
+      Room: {{ session.classroom.room.name }}
+      {{ session.classroom.room.building }}
+    </p>
+    <p>
+      Class starts from:
+      <span>
+        {{ session.from | date : "medium" }}
+      </span>
+    </p>
+    <p>
+      Class ends by:
+      <span>
+        {{ session.to | date : "medium" }}
+      </span>
+    </p>
+    <p>
+      Attendance Check-In starts from:
+      <span>
+        {{ session.checkInFrom | date : "medium" }}
+      </span>
+      to
+      <span>
+        {{ session.checkInTo | date : "medium" }}
+      </span>
+    </p>
+    <p>
+      Attendance Check-Out starts from:
+      <span>
+        {{ session.checkOutFrom | date : "medium" }}
+      </span>
+      to
+      <span>
+        {{ session.checkOutTo | date : "medium" }}
+      </span>
+    </p>
+  </div>
+
+  <h2>Attendance</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>Last Name</th>
+        <th>Checked In</th>
+        <th>Check In Timestamp</th>
+        <th>Checked Out</th>
+        <th>Check Out Timestamp</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (student of session.classroom.students; track $index) {
+      <tr>
+        <td>
+          {{ student.firstName }}
+        </td>
+        <td>
+          {{ student.middleName }}
+        </td>
+        <td>
+          {{ student.lastName }}
+        </td>
+        <td>
+          {{ isCheckedIn(student) }}
+        </td>
+        <td>
+          {{ checkInTimeStamp(student) }}
+        </td>
+        <td>
+          {{ isCheckedOut(student) }}
+        </td>
+        <td>
+          {{ checkOutTimeStamp(student) }}
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+  }
+</div>

@@ -13,6 +13,8 @@ import { AuthenticationService } from '../services/authentication/authentication
 import { inject } from '@angular/core';
 import { RoomsComponent } from './rooms/rooms.component';
 import { SessionsComponent } from './sessions/sessions.component';
+import { ClassroomSessionDetailComponent } from './classroom-session-detail/classroom-session-detail.component';
+import { ClassroomDetailComponent } from './classroom-detail/classroom-detail.component';
 
 const canActivateApp: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const auth = inject(AuthenticationService);
@@ -75,6 +77,10 @@ export const routes: Routes = [
                 component: ClassroomsComponent
             },
             {
+                path: 'classrooms/:id',
+                component: ClassroomDetailComponent
+            },
+            {
                 path: 'webhooks',
                 component: WebhooksComponent
             },
@@ -89,6 +95,10 @@ export const routes: Routes = [
             {
                 path: 'sessions',
                 component: SessionsComponent
+            },
+            {
+                path: 'sessions/:id',
+                component: ClassroomSessionDetailComponent
             },
             {
                 path: '**',

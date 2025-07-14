@@ -2,26 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { CourseMinimal } from '../course/course.service';
-import { Room, RoomMinimal } from '../room/room.service';
-import { StudentMinimal } from '../student/student.service';
-import { TeacherMinimal } from '../teacher/teacher.service';
 
 export interface Classroom {
   id: number;
   created: string;
-  room: Room;
+  room: ClassroomRoom;
   course: ClassroomCourse;
   teacher: ClassroomTeacher;
   students: ClassroomStudent[];
-}
-
-export interface ClassroomMinimal {
-  id: number;
-  room: RoomMinimal;
-  course: CourseMinimal;
-  teacher: TeacherMinimal;
-  students: StudentMinimal[];
 }
 
 export interface ClassroomForCreation {
@@ -43,10 +31,16 @@ export interface ClassroomTeacher {
 }
 
 export interface ClassroomStudent {
-  id: string;
+  id: number;
   firstName: string;
   middleName: string | null;
   lastName: string;
+}
+
+export interface ClassroomRoom {
+  id: number;
+  name: string;
+  building: string;
 }
 
 @Injectable({
@@ -55,16 +49,16 @@ export interface ClassroomStudent {
 export class ClassroomService {
   private http = inject(HttpClient);
 
-  getAll(): Observable<Classroom[]> {
+  get(): Observable<Classroom[]> {
     return this.http.get<Classroom[]>(`${environment.backendBaseUrl}classrooms`);
   }
 
-  getAllMinimal(): Observable<ClassroomMinimal[]> {
-    return this.http.get<ClassroomMinimal[]>(`${environment.backendBaseUrl}classrooms`, {
-      headers: {
-        'X-Minimal': 'true'
-      }
-    });
+  getById(id: number): Observable<Classroom> {
+    return this.http.get<Classroom>(`${environment.backendBaseUrl}classrooms/${id}`);
+  }
+
+  updateStudents(classroom: Classroom, ids: number[]): Observable<void> {
+    return this.http.put<void>(`${environment.backendBaseUrl}classrooms/${classroom.id}/students`, ids);
   }
 
   create(classroom: ClassroomForCreation): Observable<void> {
@@ -72,10 +66,6 @@ export class ClassroomService {
   }
 
   delete(classroom: Classroom): Observable<void> {
-    return this.http.delete<void>(`${environment.backendBaseUrl}classrooms`, {
-      headers: {
-        'X-Classroom-Id': classroom.id.toString()
-      }
-    });
+    return this.http.delete<void>(`${environment.backendBaseUrl}classrooms/${classroom.id}`);
   }
 }

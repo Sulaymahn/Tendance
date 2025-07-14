@@ -60,7 +60,7 @@ export class CoursesComponent implements OnInit {
   }
 
   fetchCourses(): void {
-    this.api.getAll().subscribe({
+    this.api.get().subscribe({
       next: (courses: Course[]) => {
         this.courses = courses;
       },

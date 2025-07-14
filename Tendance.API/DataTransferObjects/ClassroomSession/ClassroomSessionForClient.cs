@@ -14,6 +14,7 @@ namespace Tendance.API.DataTransferObjects.ClassroomSession
         public DateTime CheckOutTo { get; set; }
         public string? Note { get; set; }
         public DateTime Created { get; set; }
-        public required ClassroomForClientMinimal Classroom { get; set; }
+        public required ClassroomForClient Classroom { get; set; }
+        public List<ClassroomSessionAttendance> Attendances { get; set; } = [];
     }
 }

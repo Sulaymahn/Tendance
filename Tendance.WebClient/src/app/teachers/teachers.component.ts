@@ -71,7 +71,7 @@ export class TeachersComponent implements OnInit {
   }
 
   fetchTeachers(): void {
-    this.api.getAll().subscribe({
+    this.api.get().subscribe({
       next: (teachers: Teacher[]) => {
         this.teachers = teachers;
       },

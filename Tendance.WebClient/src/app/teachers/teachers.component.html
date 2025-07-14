@@ -11,7 +11,6 @@
         <th>Name</th>
         <th>Email</th>
         <th>Created</th>
-        <th class="text-end">Rate</th>
         <th></th>
       </tr>
     </thead>
@@ -25,9 +24,6 @@
         <td (click)="selectTeacher(teacher)">{{ teacher.email }}</td>
         <td (click)="selectTeacher(teacher)">
           {{ teacher.created | date : "medium" }}
-        </td>
-        <td class="text-end" (click)="selectTeacher(teacher)">
-          {{ teacher.attendanceRate }}%
         </td>
         <td>
           <button class="icon" title="options" (click)="optionClick(teacher)">

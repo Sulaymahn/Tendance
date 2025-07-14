@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using NodaTime;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
+using Tendance.API.Authentication;
 using Tendance.API.Data;
 using Tendance.API.DataTransferObjects.Classroom;
 using Tendance.API.DataTransferObjects.ClassroomSession;
-using Tendance.API.DataTransferObjects.Course;
-using Tendance.API.DataTransferObjects.Room;
-using Tendance.API.DataTransferObjects.Student;
-using Tendance.API.DataTransferObjects.Teacher;
 using Tendance.API.Entities;
 using Tendance.API.Models;
 using Tendance.API.Services;
@@ -16,52 +14,90 @@ using Tendance.API.Services;
 namespace Tendance.API.Controllers
 {
     [Route("api/sessions")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme},{DeviceAuthDefaults.AuthenticationScheme}")]
     [ApiController]
     public class ClassroomSessionController(ApplicationDbContext dbContext, UserContextAccessor userContext) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetClassroomSession([FromHeader(Name = "X-Minimal")] bool? minimal)
+        public async Task<IActionResult> GetClassroomSession()
         {
-            IQueryable<ClassroomSession> sessions = dbContext.ClassroomSessions
+            List<ClassroomSessionForClient> sessions = await dbContext.ClassroomSessions
                 .AsNoTracking()
                 .Include(s => s.Classroom)
-                .Where(session => session.Classroom != null && session.Classroom.SchoolId == userContext.SchoolId);
+                .Where(session => session.Classroom != null && session.Classroom.SchoolId == userContext.SchoolId)
+                .Select(session => new ClassroomSessionForClient
+                {
+                    Id = session.Id,
+                    CheckInFrom = session.CheckInFrom,
+                    CheckInTo = session.CheckInTo,
+                    CheckOutFrom = session.CheckOutFrom,
+                    CheckOutTo = session.CheckOutTo,
+                    From = session.From,
+                    Note = session.Note,
+                    To = session.To,
+                    Topic = session.Topic,
+                    Created = session.Created,
+                    Attendances = dbContext.StudentAttendances
+                    .AsNoTracking()
+                    .Include(att => att.Student)
+                    .Where(att => att.ClassroomSessionId == session.Id)
+                    .Select(att => new ClassroomSessionAttendance
+                    {
+                        CheckedIn = att.Type == AttendanceType.CheckIn,
+                        CheckedOut = att.Type == AttendanceType.CheckOut,
+                        FirstName = att.Student!.FirstName,
+                        CheckInTimeStamp = att.Timestamp,
+                        CheckOutTimeStamp = att.Timestamp,
+                        LastName = att.Student!.LastName,
+                        MiddleName = att.Student!.MiddleName,
+                        Role = AttendanceRole.Student,
+                        UserId = att.StudentId,
+                    }).ToList(),
+                    Classroom = new ClassroomForClient
+                    {
+                        Id = session.Classroom!.Id,
+                        Course = new ClassroomCourse
+                        {
+                            Id = session.Classroom.Course!.Id,
+                            Name = session.Classroom.Course.Name,
+                        },
+                        Room = new ClassroomRoom
+                        {
+                            Id = session.Classroom.Room!.Id,
+                            Name = session.Classroom.Room.Name,
+                            Building = session.Classroom.Room.Building,
+                        },
+                        Teacher = new ClassroomTeacher
+                        {
+                            Id = session.Classroom.Teacher!.Id,
+                            FirstName = session.Classroom.Teacher.FirstName,
+                            LastName = session.Classroom.Teacher.LastName,
+                            MiddleName = session.Classroom.Teacher.MiddleName,
+                        },
+                        Students = session.Classroom.Students.Select(student => new ClassroomStudent
+                        {
+                            Id = student.Id,
+                            FirstName = student.FirstName,
+                            LastName = student.LastName,
+                            MiddleName = student.MiddleName,
+                        })
+                    },
+                }).ToListAsync();
 
-            if (minimal.HasValue && minimal == true)
-            {
-                return Ok(await sessions.Select(session => new ClassroomSessionForClient
+            return Ok(sessions);
+        }
+
+        [HttpGet("{sessionId:int}")]
+        public async Task<IActionResult> GetClassroomSessionById([FromRoute] int sessionId)
+        {
+            ClassroomSessionForClient? session = await dbContext.ClassroomSessions
+                .AsNoTracking()
+                .Include(s => s.Classroom)
+                .ThenInclude(c => c.Students)
+                .Where(session => session.Classroom != null && session.Classroom.SchoolId == userContext.SchoolId && session.Id == sessionId)
+                .Select(session => new ClassroomSessionForClient
                 {
                     Id = session.Id,
-                    Classroom = new ClassroomForClientMinimal
-                    {
-                        Id = session.Classroom!.Id,
-                        Course = new CourseForClientMinimal
-                        {
-                            Id = session.Classroom.Course!.Id,
-                            Name = session.Classroom.Course.Name,
-                        },
-                        Room = new RoomForClientMinimal
-                        {
-                            Id = session.Classroom.Room!.Id,
-                            Name = session.Classroom.Room.Name,
-                            Building = session.Classroom.Room.Building,
-                        },
-                        Teacher = new TeacherForClientMinimal
-                        {
-                            Id = session.Classroom.Teacher!.Id,
-                            FirstName = session.Classroom.Teacher.FirstName,
-                            LastName = session.Classroom.Teacher.LastName,
-                            MiddleName = session.Classroom.Teacher.MiddleName,
-                        },
-                        Students = session.Classroom.Students.Select(student => new StudentForClientMinimal
-                        {
-                            Id = student.SchoolAssignedId,
-                            FirstName = student.FirstName,
-                            LastName = student.LastName,
-                            MiddleName = student.MiddleName,
-                        })
-                    },
                     CheckInFrom = session.CheckInFrom,
                     CheckInTo = session.CheckInTo,
                     CheckOutFrom = session.CheckOutFrom,
@@ -70,59 +106,66 @@ namespace Tendance.API.Controllers
                     Note = session.Note,
                     To = session.To,
                     Topic = session.Topic,
-                }).ToListAsync());
-            }
-            else
-            {
-                return Ok(await sessions.Select(session => new ClassroomSessionForClient
-                {
-                    Id = session.Id,
-                    Classroom = new ClassroomForClientMinimal
+                    Attendances = dbContext.StudentAttendances
+                    .AsNoTracking()
+                    .Include(att => att.Student)
+                    .Where(att => att.ClassroomSessionId == session.Id)
+                    .Select(att => new ClassroomSessionAttendance
+                    {
+                        CheckedIn = att.Type == AttendanceType.CheckIn,
+                        CheckedOut = att.Type == AttendanceType.CheckOut,
+                        FirstName = att.Student!.FirstName,
+                        CheckInTimeStamp = att.Timestamp,
+                        CheckOutTimeStamp = att.Timestamp,
+                        LastName = att.Student!.LastName,
+                        MiddleName = att.Student!.MiddleName,
+                        Role = AttendanceRole.Student,
+                        UserId = att.StudentId,
+                    }).ToList(),
+                    Classroom = new ClassroomForClient
                     {
                         Id = session.Classroom!.Id,
-                        Course = new CourseForClientMinimal
+                        Course = new ClassroomCourse
                         {
                             Id = session.Classroom.Course!.Id,
                             Name = session.Classroom.Course.Name,
                         },
-                        Room = new RoomForClientMinimal
+                        Room = new ClassroomRoom
                         {
                             Id = session.Classroom.Room!.Id,
                             Name = session.Classroom.Room.Name,
                             Building = session.Classroom.Room.Building,
                         },
-                        Teacher = new TeacherForClientMinimal
+                        Teacher = new ClassroomTeacher
                         {
                             Id = session.Classroom.Teacher!.Id,
                             FirstName = session.Classroom.Teacher.FirstName,
                             LastName = session.Classroom.Teacher.LastName,
                             MiddleName = session.Classroom.Teacher.MiddleName,
                         },
-                        Students = session.Classroom.Students.Select(student => new StudentForClientMinimal
+                        Students = session.Classroom.Students.Select(student => new ClassroomStudent
                         {
-                            Id = student.SchoolAssignedId,
+                            Id = student.Id,
                             FirstName = student.FirstName,
                             LastName = student.LastName,
                             MiddleName = student.MiddleName,
                         })
                     },
-                    CheckInFrom = session.CheckInFrom,
-                    CheckInTo = session.CheckInTo,
-                    CheckOutFrom = session.CheckOutFrom,
-                    CheckOutTo = session.CheckOutTo,
-                    From = session.From,
-                    Note = session.Note,
-                    To = session.To,
-                    Topic = session.Topic,
-                }).ToListAsync());
+                }).FirstOrDefaultAsync();
+
+            if (session == null)
+            {
+                return NotFound();
             }
+
+            return Ok(session);
         }
 
         [Authorize(Policy = TendancePolicy.UserOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateClassroomSession([FromBody] ClassroomSessionForCreation sessionForCreation)
         {
-            Classroom? classroom = await dbContext.Classrooms.FirstOrDefaultAsync(classroom => classroom.SchoolId == userContext.SchoolId && classroom.Id == sessionForCreation.ClassroomId);
+            ClassroomEntity? classroom = await dbContext.Classrooms.FirstOrDefaultAsync(classroom => classroom.SchoolId == userContext.SchoolId && classroom.Id == sessionForCreation.ClassroomId);
             if (classroom == null)
             {
                 return BadRequest("Classroom not found");
@@ -152,7 +195,7 @@ namespace Tendance.API.Controllers
             sessionForCreation.CheckOutTo = DateTime.SpecifyKind(sessionForCreation.CheckOutTo, DateTimeKind.Local);
             sessionForCreation.CheckOutTo = timezone.AtStrictly(LocalDateTime.FromDateTime(sessionForCreation.CheckOutTo)).ToDateTimeUtc();
 
-            ClassroomSession session = new ClassroomSession
+            ClassroomSessionEntity session = new ClassroomSessionEntity
             {
                 ClassroomId = classroom.Id,
                 CheckInFrom = sessionForCreation.CheckInFrom,
@@ -176,7 +219,7 @@ namespace Tendance.API.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteClassroomSession([FromHeader(Name = "X-Classroom-Session-Id")] int sessionId)
         {
-            ClassroomSession? session = await dbContext.ClassroomSessions.FirstOrDefaultAsync(session => session.Id == sessionId && session.Classroom != null && session.Classroom.SchoolId == userContext.SchoolId);
+            ClassroomSessionEntity? session = await dbContext.ClassroomSessions.FirstOrDefaultAsync(session => session.Id == sessionId && session.Classroom != null && session.Classroom.SchoolId == userContext.SchoolId);
             if (session != null)
             {
                 dbContext.ClassroomSessions.Remove(session);
